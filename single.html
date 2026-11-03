@@ -170,6 +170,45 @@ body.ending-mode #model-layer,body.ending-mode #stage,body.ending-mode #archive,
  #archive .era-label{font-size:18px!important;letter-spacing:-.8px;margin-right:2px}
 }
 
+/* Actual per-era font assets; paragraphs retain the readable body face. */
+@font-face{font-family:Era1910;src:url('./assets/fonts/Era1910Specimen.otf') format('opentype');font-weight:400;font-style:normal;font-display:swap}
+#specimen-glyph.era-1910,.era-event[data-year="1910"] h2{font-family:Era1910,serif;font-weight:400}
+@font-face{font-family:Era1920;src:url('./assets/fonts/NanumMyeongjo-Regular.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap}
+#specimen-glyph.era-1920,.era-event[data-year="1920"] h2{font-family:Era1920,serif;font-weight:400}
+@font-face{font-family:Era1930;src:url('./assets/fonts/NanumBrushScript-Regular.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap}
+#specimen-glyph.era-1930,.era-event[data-year="1930"] h2{font-family:Era1930,serif;font-weight:400}
+@font-face{font-family:Era1950;src:url('./assets/fonts/NanumPenScript-Regular.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap}
+#specimen-glyph.era-1950,.era-event[data-year="1950"] h2{font-family:Era1950,serif;font-weight:400}
+@font-face{font-family:Era1960;src:url('./assets/fonts/BMYEONSUNG_ttf.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap}
+#specimen-glyph.era-1960,.era-event[data-year="1960"] h2{font-family:Era1960,serif;font-weight:400}
+@font-face{font-family:Era1970;src:url('./assets/fonts/BMHANNA_11yrs_ttf.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap}
+#specimen-glyph.era-1970,.era-event[data-year="1970"] h2{font-family:Era1970,serif;font-weight:400}
+@font-face{font-family:Era1980;src:url('./assets/fonts/BMJUA_ttf.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap}
+#specimen-glyph.era-1980,.era-event[data-year="1980"] h2{font-family:Era1980,serif;font-weight:400}
+@font-face{font-family:Era1990;src:url('./assets/fonts/BMDOHYEON_ttf.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap}
+#specimen-glyph.era-1990,.era-event[data-year="1990"] h2{font-family:Era1990,serif;font-weight:400}
+@font-face{font-family:Era2000;src:url('./assets/fonts/BMHANNAAir_ttf.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap}
+#specimen-glyph.era-2000,.era-event[data-year="2000"] h2{font-family:Era2000,serif;font-weight:400}
+@font-face{font-family:Era2010;src:url('./assets/fonts/BMEULJIROTTF.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap}
+#specimen-glyph.era-2010,.era-event[data-year="2010"] h2{font-family:Era2010,serif;font-weight:400}
+@font-face{font-family:Era2020;src:url('./assets/fonts/BMEuljiro10yearslater.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap}
+#specimen-glyph.era-2020,.era-event[data-year="2020"] h2{font-family:Era2020,serif;font-weight:400}
+
+#ending-question-panel{position:absolute;inset:0;z-index:4;display:flex;align-items:center;justify-content:center;flex-direction:column;padding:7vw;opacity:0;pointer-events:none;transition:opacity .65s ease}
+#ending-question{font-family:Pretendard,sans-serif;color:#fafafa;font-size:clamp(28px,2.4vw,44px);line-height:1.65;text-align:center;margin:0;word-break:keep-all;max-width:1100px}
+#ending-question .question-lead{display:block;font-size:24px;font-weight:400;margin-bottom:12px;color:rgb(250 250 250 / .8)}
+#ending-question strong{font-weight:750;color:#c3d132}
+#ending-home{display:block;margin-top:30px;background:transparent;color:#fafafa;padding:10px 22px;font-size:40px;line-height:1;border:0;outline:0}
+#ending-home:hover,#ending-home:focus-visible{color:#c3d132;transform:translateY(-3px)}
+#ending-scene.question-mode #ending-question-panel{opacity:1;pointer-events:auto}
+#ending-collage{transition:opacity .65s ease}
+#ending-scene.question-mode #ending-collage{opacity:.25}
+#ending-scene.question-mode #ending-message{opacity:0;pointer-events:none}
+#ending-scene.question-mode::after{opacity:0}
+#ending-scene.question-mode #ending-back{z-index:5}
+#ending-scene{touch-action:none}
+@media(max-width:700px){#ending-question{font-size:28px;line-height:1.6}#ending-question .question-lead{font-size:20px}#ending-question-panel{padding:24px}}
+
 </style>
 </head>
 <body>
@@ -195,6 +234,10 @@ body.ending-mode #model-layer,body.ending-mode #stage,body.ending-mode #archive,
     <img id="ending-intro" alt="상가 건물의 외벽을 채운 간판들" hidden>
     <div id="ending-collage" aria-label="겹쳐 나타나는 간판 사진들"></div>
     <p id="ending-message"></p>
+    <div id="ending-question-panel" aria-label="간판 개선 사업에 대한 질문" aria-live="polite" hidden>
+      <p id="ending-question"><span class="question-lead">간판 개선 사업은 사업의 목적 중</span>거리의 시각적 <strong>환경</strong>을 실제로 개선했는가?</p>
+      <button id="ending-home" type="button" aria-label="메인 화면으로 이동">↑</button>
+    </div>
     <button id="ending-back" type="button">- 돌아가기</button>
   </section>
   <dialog id="enlarged" aria-label="확대한 사진">
@@ -210,9 +253,9 @@ body.ending-mode #model-layer,body.ending-mode #stage,body.ending-mode #archive,
       "sourcePage": 6,
       "materialChange": "목판·철판에 손으로 글씨를 쓰고, 낮은 건물에 큰 글씨판을 내걸었다.",
       "specimen": {
-        "typeFamily": "붓글씨 한자·한글 병기",
+        "typeFamily": "본명조 · 명조·한자 계열",
         "material": "목판·철제에 페인트",
-        "fontClass": "brush",
+        "fontClass": "era-1910",
         "palette": [
           {
             "hex": "#F2EEE6",
@@ -236,7 +279,10 @@ body.ending-mode #model-layer,body.ending-mode #stage,body.ending-mode #archive,
           }
         ],
         "sourcePage": 6,
-        "note": "PDF의 서체 계열·대표 색채를 재구성한 견본이며, 역사적 원본 폰트나 실측 색채가 아님."
+        "note": "시대별 서체 특징을 서로 다른 현대 글꼴로 보여주는 견본. 2010년대는 공식 배포 을지로체, 2020년대는 공식 을지로10년후체. 초기 시대의 실제 디지털 폰트 사용 사실을 뜻하지 않음.",
+        "fontFamily": "Era1910",
+        "fontName": "본명조",
+        "fontFile": "assets/fonts/Era1910Specimen.otf"
       }
     },
     {
@@ -246,9 +292,9 @@ body.ending-mode #model-layer,body.ending-mode #stage,body.ending-mode #archive,
       "sourcePage": 6,
       "materialChange": "목판·법랑·철제 간판에 한글·한자·일본어를 병기하고, 1920년대 말 경성에 네온이 등장했다.",
       "specimen": {
-        "typeFamily": "붓글씨 한자·한글·가나 병기",
+        "typeFamily": "나눔명조 · 명조 계열",
         "material": "목판·법랑·철제",
-        "fontClass": "brush",
+        "fontClass": "era-1920",
         "palette": [
           {
             "hex": "#F2EEE6",
@@ -272,7 +318,10 @@ body.ending-mode #model-layer,body.ending-mode #stage,body.ending-mode #archive,
           }
         ],
         "sourcePage": 6,
-        "note": "PDF의 서체 계열·대표 색채를 재구성한 견본이며, 역사적 원본 폰트나 실측 색채가 아님."
+        "note": "시대별 서체 특징을 서로 다른 현대 글꼴로 보여주는 견본. 2010년대는 공식 배포 을지로체, 2020년대는 공식 을지로10년후체. 초기 시대의 실제 디지털 폰트 사용 사실을 뜻하지 않음.",
+        "fontFamily": "Era1920",
+        "fontName": "나눔명조",
+        "fontFile": "assets/fonts/NanumMyeongjo-Regular.ttf"
       }
     },
     {
@@ -282,9 +331,9 @@ body.ending-mode #model-layer,body.ending-mode #stage,body.ending-mode #archive,
       "sourcePage": 6,
       "materialChange": "유리관을 이용한 네온 간판이 번화가로 확산되고, 붓글씨와 여러 문자를 함께 사용했다.",
       "specimen": {
-        "typeFamily": "붓글씨 한자·한글·가나 병기",
+        "typeFamily": "나눔붓 · 붓글씨",
         "material": "철제 페인트·네온관",
-        "fontClass": "brush",
+        "fontClass": "era-1930",
         "palette": [
           {
             "hex": "#F2EEE6",
@@ -308,7 +357,10 @@ body.ending-mode #model-layer,body.ending-mode #stage,body.ending-mode #archive,
           }
         ],
         "sourcePage": 6,
-        "note": "PDF의 서체 계열·대표 색채를 재구성한 견본이며, 역사적 원본 폰트나 실측 색채가 아님."
+        "note": "시대별 서체 특징을 서로 다른 현대 글꼴로 보여주는 견본. 2010년대는 공식 배포 을지로체, 2020년대는 공식 을지로10년후체. 초기 시대의 실제 디지털 폰트 사용 사실을 뜻하지 않음.",
+        "fontFamily": "Era1930",
+        "fontName": "나눔붓",
+        "fontFile": "assets/fonts/NanumBrushScript-Regular.ttf"
       }
     },
     {
@@ -318,9 +370,9 @@ body.ending-mode #model-layer,body.ending-mode #stage,body.ending-mode #archive,
       "sourcePage": 7,
       "materialChange": "가볍고 칠하기 쉬운 함석판에 페인트로 한글·한자 상호를 크게 써 넣었다.",
       "specimen": {
-        "typeFamily": "손 페인트 글씨·한글·한자 혼용",
+        "typeFamily": "나눔펜 · 손글씨",
         "material": "함석판에 페인트",
-        "fontClass": "brush",
+        "fontClass": "era-1950",
         "palette": [
           {
             "hex": "#F5F3EE",
@@ -344,7 +396,10 @@ body.ending-mode #model-layer,body.ending-mode #stage,body.ending-mode #archive,
           }
         ],
         "sourcePage": 7,
-        "note": "PDF의 서체 계열·대표 색채를 재구성한 견본이며, 역사적 원본 폰트나 실측 색채가 아님."
+        "note": "시대별 서체 특징을 서로 다른 현대 글꼴로 보여주는 견본. 2010년대는 공식 배포 을지로체, 2020년대는 공식 을지로10년후체. 초기 시대의 실제 디지털 폰트 사용 사실을 뜻하지 않음.",
+        "fontFamily": "Era1950",
+        "fontName": "나눔펜",
+        "fontFile": "assets/fonts/NanumPenScript-Regular.ttf"
       }
     },
     {
@@ -354,9 +409,9 @@ body.ending-mode #model-layer,body.ending-mode #stage,body.ending-mode #archive,
       "sourcePage": 7,
       "materialChange": "T/C천과 함석·철판 입체문자가 쓰였으며, 서로 다른 크기와 손글씨가 거리에서 공존했다.",
       "specimen": {
-        "typeFamily": "손 페인트 글씨·한글·한자 혼용",
+        "typeFamily": "연성체 · 페인트 글씨",
         "material": "함석·철판 입체문자",
-        "fontClass": "brush",
+        "fontClass": "era-1960",
         "palette": [
           {
             "hex": "#F5F3EE",
@@ -380,7 +435,10 @@ body.ending-mode #model-layer,body.ending-mode #stage,body.ending-mode #archive,
           }
         ],
         "sourcePage": 7,
-        "note": "PDF의 서체 계열·대표 색채를 재구성한 견본이며, 역사적 원본 폰트나 실측 색채가 아님."
+        "note": "시대별 서체 특징을 서로 다른 현대 글꼴로 보여주는 견본. 2010년대는 공식 배포 을지로체, 2020년대는 공식 을지로10년후체. 초기 시대의 실제 디지털 폰트 사용 사실을 뜻하지 않음.",
+        "fontFamily": "Era1960",
+        "fontName": "연성체",
+        "fontFile": "assets/fonts/BMYEONSUNG_ttf.ttf"
       }
     },
     {
@@ -390,9 +448,9 @@ body.ending-mode #model-layer,body.ending-mode #stage,body.ending-mode #archive,
       "sourcePage": 8,
       "materialChange": "아크릴과 형광등으로 간판 면을 밝히고, 시트지를 잘라 만든 큰 글자가 면을 채웠다.",
       "specimen": {
-        "typeFamily": "시트지 커팅 고딕·둥근고딕",
+        "typeFamily": "한나체 11살 · 시트지 글자",
         "material": "아크릴·형광등",
-        "fontClass": "gothic",
+        "fontClass": "era-1970",
         "palette": [
           {
             "hex": "#FAFAF2",
@@ -416,7 +474,10 @@ body.ending-mode #model-layer,body.ending-mode #stage,body.ending-mode #archive,
           }
         ],
         "sourcePage": 8,
-        "note": "PDF의 서체 계열·대표 색채를 재구성한 견본이며, 역사적 원본 폰트나 실측 색채가 아님."
+        "note": "시대별 서체 특징을 서로 다른 현대 글꼴로 보여주는 견본. 2010년대는 공식 배포 을지로체, 2020년대는 공식 을지로10년후체. 초기 시대의 실제 디지털 폰트 사용 사실을 뜻하지 않음.",
+        "fontFamily": "Era1970",
+        "fontName": "한나체 11살",
+        "fontFile": "assets/fonts/BMHANNA_11yrs_ttf.ttf"
       }
     },
     {
@@ -426,9 +487,9 @@ body.ending-mode #model-layer,body.ending-mode #stage,body.ending-mode #archive,
       "sourcePage": 9,
       "materialChange": "내부조명·유연성 원단 간판이 확산되고, 유리창에 상호와 그림을 넣는 선팅 광고가 등장했다.",
       "specimen": {
-        "typeFamily": "넓적붓 페인트 글씨·필름 레터링",
+        "typeFamily": "주아체 · 둥근고딕",
         "material": "내부조명·유연성 원단",
-        "fontClass": "brush",
+        "fontClass": "era-1980",
         "palette": [
           {
             "hex": "#E0201B",
@@ -452,7 +513,10 @@ body.ending-mode #model-layer,body.ending-mode #stage,body.ending-mode #archive,
           }
         ],
         "sourcePage": 9,
-        "note": "PDF의 서체 계열·대표 색채를 재구성한 견본이며, 역사적 원본 폰트나 실측 색채가 아님."
+        "note": "시대별 서체 특징을 서로 다른 현대 글꼴로 보여주는 견본. 2010년대는 공식 배포 을지로체, 2020년대는 공식 을지로10년후체. 초기 시대의 실제 디지털 폰트 사용 사실을 뜻하지 않음.",
+        "fontFamily": "Era1980",
+        "fontName": "주아체",
+        "fontFile": "assets/fonts/BMJUA_ttf.ttf"
       }
     },
     {
@@ -462,9 +526,9 @@ body.ending-mode #model-layer,body.ending-mode #stage,body.ending-mode #archive,
       "sourcePage": 10,
       "materialChange": "플렉스·실사 출력과 디지털 폰트가 확산되고, 사진·그림·풀컬러 LED 전광판이 더해졌다.",
       "specimen": {
-        "typeFamily": "디지털 폰트·실사 출력",
+        "typeFamily": "도현체 · 디지털 고딕",
         "material": "플렉스·디지털 프린팅",
-        "fontClass": "digital",
+        "fontClass": "era-1990",
         "palette": [
           {
             "hex": "#E60012",
@@ -488,7 +552,10 @@ body.ending-mode #model-layer,body.ending-mode #stage,body.ending-mode #archive,
           }
         ],
         "sourcePage": 10,
-        "note": "PDF의 서체 계열·대표 색채를 재구성한 견본이며, 역사적 원본 폰트나 실측 색채가 아님."
+        "note": "시대별 서체 특징을 서로 다른 현대 글꼴로 보여주는 견본. 2010년대는 공식 배포 을지로체, 2020년대는 공식 을지로10년후체. 초기 시대의 실제 디지털 폰트 사용 사실을 뜻하지 않음.",
+        "fontFamily": "Era1990",
+        "fontName": "도현체",
+        "fontFile": "assets/fonts/BMDOHYEON_ttf.ttf"
       }
     },
     {
@@ -498,9 +565,9 @@ body.ending-mode #model-layer,body.ending-mode #stage,body.ending-mode #archive,
       "sourcePage": 11,
       "materialChange": "금속 입체문자에 LED를 넣는 채널간판과 고해상도 음식·인물 사진 간판이 확산되었다.",
       "specimen": {
-        "typeFamily": "채널 입체문자·사진과 원색 문구",
+        "typeFamily": "한나체 Air · 입체문자",
         "material": "LED·금속 채널간판",
-        "fontClass": "digital",
+        "fontClass": "era-2000",
         "palette": [
           {
             "hex": "#FF1F4B",
@@ -524,7 +591,10 @@ body.ending-mode #model-layer,body.ending-mode #stage,body.ending-mode #archive,
           }
         ],
         "sourcePage": 11,
-        "note": "PDF의 서체 계열·대표 색채를 재구성한 견본이며, 역사적 원본 폰트나 실측 색채가 아님."
+        "note": "시대별 서체 특징을 서로 다른 현대 글꼴로 보여주는 견본. 2010년대는 공식 배포 을지로체, 2020년대는 공식 을지로10년후체. 초기 시대의 실제 디지털 폰트 사용 사실을 뜻하지 않음.",
+        "fontFamily": "Era2000",
+        "fontName": "한나체 Air",
+        "fontFile": "assets/fonts/BMHANNAAir_ttf.ttf"
       }
     },
     {
@@ -534,9 +604,9 @@ body.ending-mode #model-layer,body.ending-mode #stage,body.ending-mode #archive,
       "sourcePage": 12,
       "materialChange": "내용이 바뀌는 디지털광고물이 등장하고, 옛 간판 붓글씨와 시트지 글자가 디지털 서체로 재해석되었다.",
       "specimen": {
-        "typeFamily": "복고 서체의 디지털 재해석",
+        "typeFamily": "을지로체 · 간판 붓글씨",
         "material": "입체문자·디지털광고물",
-        "fontClass": "brush",
+        "fontClass": "era-2010",
         "palette": [
           {
             "hex": "#5E6B73",
@@ -560,7 +630,10 @@ body.ending-mode #model-layer,body.ending-mode #stage,body.ending-mode #archive,
           }
         ],
         "sourcePage": 12,
-        "note": "PDF의 서체 계열·대표 색채를 재구성한 견본이며, 역사적 원본 폰트나 실측 색채가 아님."
+        "note": "시대별 서체 특징을 서로 다른 현대 글꼴로 보여주는 견본. 2010년대는 공식 배포 을지로체, 2020년대는 공식 을지로10년후체. 초기 시대의 실제 디지털 폰트 사용 사실을 뜻하지 않음.",
+        "fontFamily": "Era2010",
+        "fontName": "을지로체",
+        "fontFile": "assets/fonts/BMEULJIROTTF.ttf"
       }
     },
     {
@@ -570,9 +643,9 @@ body.ending-mode #model-layer,body.ending-mode #stage,body.ending-mode #archive,
       "sourcePage": 12,
       "materialChange": "입체문자 중심의 정돈된 간판과 초대형 디지털 화면이 공존하며 빛과 화면 변화가 표현 수단이 되었다.",
       "specimen": {
-        "typeFamily": "복고 서체·디지털 글자",
+        "typeFamily": "을지로10년후체 · 복고 글씨",
         "material": "입체문자·디지털 화면",
-        "fontClass": "gothic",
+        "fontClass": "era-2020",
         "palette": [
           {
             "hex": "#5E6B73",
@@ -596,7 +669,10 @@ body.ending-mode #model-layer,body.ending-mode #stage,body.ending-mode #archive,
           }
         ],
         "sourcePage": 12,
-        "note": "PDF의 서체 계열·대표 색채를 재구성한 견본이며, 역사적 원본 폰트나 실측 색채가 아님."
+        "note": "시대별 서체 특징을 서로 다른 현대 글꼴로 보여주는 견본. 2010년대는 공식 배포 을지로체, 2020년대는 공식 을지로10년후체. 초기 시대의 실제 디지털 폰트 사용 사실을 뜻하지 않음.",
+        "fontFamily": "Era2020",
+        "fontName": "을지로10년후체",
+        "fontFile": "assets/fonts/BMEuljiro10yearslater.ttf"
       }
     }
   ],
@@ -2240,6 +2316,11 @@ body.ending-mode #model-layer,body.ending-mode #stage,body.ending-mode #archive,
       "black": 300,
       "stagger": 150,
       "photoFade": 1000
+    },
+    "question": {
+      "lead": "간판 개선 사업은 사업의 목적 중",
+      "text": "거리의 시각적 환경을 실제로 개선했는가?",
+      "emphasis": "환경"
     }
   }
 }
@@ -4487,6 +4568,7 @@ function updateTimeline(year) {
   $('#specimen-glyph').className=specimen.fontClass;
   $('#specimen-material').textContent=specimen.material;
   $('#specimen-type').textContent=specimen.typeFamily;
+  const loadingYear=year;document.fonts.load(`128px ${specimen.fontFamily}`).then(()=>{if(current?.era===loadingYear)centerActiveEra('instant');});
   $('#specimen-colors').replaceChildren();
   for(const color of specimen.palette){
     const swatch=document.createElement('span');swatch.style.backgroundColor=color.hex;
@@ -4789,6 +4871,7 @@ function stopEnding(){
   $('#ending-scene').hidden=true;$('#ending-scene').dataset.phase='idle';
   $('#ending-intro').removeAttribute('src');$('#ending-intro').hidden=true;
   $('#ending-collage').replaceChildren();$('#ending-message').classList.remove('visible');
+  $('#ending-scene').classList.remove('question-mode');$('#ending-question-panel').hidden=true;endingQuestionDelta=0;
 }
 function endingLater(callback,ms,token){
   endingTimers.push(setTimeout(()=>{if(token===endingGeneration)callback();},ms));
@@ -4851,6 +4934,30 @@ async function startEnding(previous){
     endingLater(()=>revealEndingPhotos(token),reduced?0:config.timing.black,token);
   }
 }
+let endingQuestionDelta=0,endingTouchY;
+function showEndingQuestion(){
+  if($('#ending-scene').dataset.phase!=='collage')return;
+  $('#ending-question-panel').hidden=false;
+  requestAnimationFrame(()=>{if(!$('#ending-scene').hidden){$('#ending-scene').classList.add('question-mode');$('#ending-home').focus({preventScroll:true});}});
+}
+function hideEndingQuestion(){
+  $('#ending-scene').classList.remove('question-mode');$('#ending-question-panel').hidden=true;endingQuestionDelta=0;
+}
+function moveEndingQuestion(delta){
+  if($('#ending-scene').dataset.phase!=='collage')return;
+  endingQuestionDelta+=delta;
+  if(endingQuestionDelta>=80){showEndingQuestion();endingQuestionDelta=0;}
+  else if(endingQuestionDelta<=-80){hideEndingQuestion();}
+}
+$('#ending-scene').addEventListener('wheel',e=>{e.preventDefault();e.stopPropagation();moveEndingQuestion(e.deltaY*(e.deltaMode===1?16:e.deltaMode===2?innerHeight:1));},{passive:false});
+$('#ending-scene').addEventListener('touchstart',e=>endingTouchY=e.touches[0].clientY,{passive:true});
+$('#ending-scene').addEventListener('touchmove',e=>{if(endingTouchY==null)return;e.preventDefault();const y=e.touches[0].clientY;moveEndingQuestion(endingTouchY-y);endingTouchY=y;},{passive:false});
+$('#ending-scene').addEventListener('touchend',()=>endingTouchY=null);
+$('#ending-scene').addEventListener('keydown',e=>{
+  if(['ArrowDown','PageDown'].includes(e.key)){e.preventDefault();e.stopPropagation();showEndingQuestion();}
+  else if(['ArrowUp','PageUp'].includes(e.key)){e.preventDefault();e.stopPropagation();hideEndingQuestion();}
+});
+$('#ending-home').addEventListener('click',()=>{navigateTo(0,true);archiveNode.scrollTo({top:0,behavior:'instant'});activeButton?.focus({preventScroll:true});});
 function leaveEnding(){navigateTo(endingReturnIndex,true);activeButton?.focus({preventScroll:true});}
 $('#ending-back').addEventListener('click',leaveEnding);
 addEventListener('keydown',e=>{if(!$('#ending-scene').hidden&&e.key==='Escape'){e.preventDefault();leaveEnding();}});

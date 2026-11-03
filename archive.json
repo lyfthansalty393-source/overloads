@@ -7,9 +7,9 @@
       "sourcePage": 6,
       "materialChange": "목판·철판에 손으로 글씨를 쓰고, 낮은 건물에 큰 글씨판을 내걸었다.",
       "specimen": {
-        "typeFamily": "붓글씨 한자·한글 병기",
+        "typeFamily": "본명조 · 명조·한자 계열",
         "material": "목판·철제에 페인트",
-        "fontClass": "brush",
+        "fontClass": "era-1910",
         "palette": [
           {
             "hex": "#F2EEE6",
@@ -33,7 +33,10 @@
           }
         ],
         "sourcePage": 6,
-        "note": "PDF의 서체 계열·대표 색채를 재구성한 견본이며, 역사적 원본 폰트나 실측 색채가 아님."
+        "note": "시대별 서체 특징을 서로 다른 현대 글꼴로 보여주는 견본. 2010년대는 공식 배포 을지로체, 2020년대는 공식 을지로10년후체. 초기 시대의 실제 디지털 폰트 사용 사실을 뜻하지 않음.",
+        "fontFamily": "Era1910",
+        "fontName": "본명조",
+        "fontFile": "assets/fonts/Era1910Specimen.otf"
       }
     },
     {
@@ -43,9 +46,9 @@
       "sourcePage": 6,
       "materialChange": "목판·법랑·철제 간판에 한글·한자·일본어를 병기하고, 1920년대 말 경성에 네온이 등장했다.",
       "specimen": {
-        "typeFamily": "붓글씨 한자·한글·가나 병기",
+        "typeFamily": "나눔명조 · 명조 계열",
         "material": "목판·법랑·철제",
-        "fontClass": "brush",
+        "fontClass": "era-1920",
         "palette": [
           {
             "hex": "#F2EEE6",
@@ -69,7 +72,10 @@
           }
         ],
         "sourcePage": 6,
-        "note": "PDF의 서체 계열·대표 색채를 재구성한 견본이며, 역사적 원본 폰트나 실측 색채가 아님."
+        "note": "시대별 서체 특징을 서로 다른 현대 글꼴로 보여주는 견본. 2010년대는 공식 배포 을지로체, 2020년대는 공식 을지로10년후체. 초기 시대의 실제 디지털 폰트 사용 사실을 뜻하지 않음.",
+        "fontFamily": "Era1920",
+        "fontName": "나눔명조",
+        "fontFile": "assets/fonts/NanumMyeongjo-Regular.ttf"
       }
     },
     {
@@ -79,9 +85,9 @@
       "sourcePage": 6,
       "materialChange": "유리관을 이용한 네온 간판이 번화가로 확산되고, 붓글씨와 여러 문자를 함께 사용했다.",
       "specimen": {
-        "typeFamily": "붓글씨 한자·한글·가나 병기",
+        "typeFamily": "나눔붓 · 붓글씨",
         "material": "철제 페인트·네온관",
-        "fontClass": "brush",
+        "fontClass": "era-1930",
         "palette": [
           {
             "hex": "#F2EEE6",
@@ -105,7 +111,10 @@
           }
         ],
         "sourcePage": 6,
-        "note": "PDF의 서체 계열·대표 색채를 재구성한 견본이며, 역사적 원본 폰트나 실측 색채가 아님."
+        "note": "시대별 서체 특징을 서로 다른 현대 글꼴로 보여주는 견본. 2010년대는 공식 배포 을지로체, 2020년대는 공식 을지로10년후체. 초기 시대의 실제 디지털 폰트 사용 사실을 뜻하지 않음.",
+        "fontFamily": "Era1930",
+        "fontName": "나눔붓",
+        "fontFile": "assets/fonts/NanumBrushScript-Regular.ttf"
       }
     },
     {
@@ -115,9 +124,9 @@
       "sourcePage": 7,
       "materialChange": "가볍고 칠하기 쉬운 함석판에 페인트로 한글·한자 상호를 크게 써 넣었다.",
       "specimen": {
-        "typeFamily": "손 페인트 글씨·한글·한자 혼용",
+        "typeFamily": "나눔펜 · 손글씨",
         "material": "함석판에 페인트",
-        "fontClass": "brush",
+        "fontClass": "era-1950",
         "palette": [
           {
             "hex": "#F5F3EE",
@@ -141,7 +150,10 @@
           }
         ],
         "sourcePage": 7,
-        "note": "PDF의 서체 계열·대표 색채를 재구성한 견본이며, 역사적 원본 폰트나 실측 색채가 아님."
+        "note": "시대별 서체 특징을 서로 다른 현대 글꼴로 보여주는 견본. 2010년대는 공식 배포 을지로체, 2020년대는 공식 을지로10년후체. 초기 시대의 실제 디지털 폰트 사용 사실을 뜻하지 않음.",
+        "fontFamily": "Era1950",
+        "fontName": "나눔펜",
+        "fontFile": "assets/fonts/NanumPenScript-Regular.ttf"
       }
     },
     {
@@ -151,9 +163,9 @@
       "sourcePage": 7,
       "materialChange": "T/C천과 함석·철판 입체문자가 쓰였으며, 서로 다른 크기와 손글씨가 거리에서 공존했다.",
       "specimen": {
-        "typeFamily": "손 페인트 글씨·한글·한자 혼용",
+        "typeFamily": "연성체 · 페인트 글씨",
         "material": "함석·철판 입체문자",
-        "fontClass": "brush",
+        "fontClass": "era-1960",
         "palette": [
           {
             "hex": "#F5F3EE",
@@ -177,7 +189,10 @@
           }
         ],
         "sourcePage": 7,
-        "note": "PDF의 서체 계열·대표 색채를 재구성한 견본이며, 역사적 원본 폰트나 실측 색채가 아님."
+        "note": "시대별 서체 특징을 서로 다른 현대 글꼴로 보여주는 견본. 2010년대는 공식 배포 을지로체, 2020년대는 공식 을지로10년후체. 초기 시대의 실제 디지털 폰트 사용 사실을 뜻하지 않음.",
+        "fontFamily": "Era1960",
+        "fontName": "연성체",
+        "fontFile": "assets/fonts/BMYEONSUNG_ttf.ttf"
       }
     },
     {
@@ -187,9 +202,9 @@
       "sourcePage": 8,
       "materialChange": "아크릴과 형광등으로 간판 면을 밝히고, 시트지를 잘라 만든 큰 글자가 면을 채웠다.",
       "specimen": {
-        "typeFamily": "시트지 커팅 고딕·둥근고딕",
+        "typeFamily": "한나체 11살 · 시트지 글자",
         "material": "아크릴·형광등",
-        "fontClass": "gothic",
+        "fontClass": "era-1970",
         "palette": [
           {
             "hex": "#FAFAF2",
@@ -213,7 +228,10 @@
           }
         ],
         "sourcePage": 8,
-        "note": "PDF의 서체 계열·대표 색채를 재구성한 견본이며, 역사적 원본 폰트나 실측 색채가 아님."
+        "note": "시대별 서체 특징을 서로 다른 현대 글꼴로 보여주는 견본. 2010년대는 공식 배포 을지로체, 2020년대는 공식 을지로10년후체. 초기 시대의 실제 디지털 폰트 사용 사실을 뜻하지 않음.",
+        "fontFamily": "Era1970",
+        "fontName": "한나체 11살",
+        "fontFile": "assets/fonts/BMHANNA_11yrs_ttf.ttf"
       }
     },
     {
@@ -223,9 +241,9 @@
       "sourcePage": 9,
       "materialChange": "내부조명·유연성 원단 간판이 확산되고, 유리창에 상호와 그림을 넣는 선팅 광고가 등장했다.",
       "specimen": {
-        "typeFamily": "넓적붓 페인트 글씨·필름 레터링",
+        "typeFamily": "주아체 · 둥근고딕",
         "material": "내부조명·유연성 원단",
-        "fontClass": "brush",
+        "fontClass": "era-1980",
         "palette": [
           {
             "hex": "#E0201B",
@@ -249,7 +267,10 @@
           }
         ],
         "sourcePage": 9,
-        "note": "PDF의 서체 계열·대표 색채를 재구성한 견본이며, 역사적 원본 폰트나 실측 색채가 아님."
+        "note": "시대별 서체 특징을 서로 다른 현대 글꼴로 보여주는 견본. 2010년대는 공식 배포 을지로체, 2020년대는 공식 을지로10년후체. 초기 시대의 실제 디지털 폰트 사용 사실을 뜻하지 않음.",
+        "fontFamily": "Era1980",
+        "fontName": "주아체",
+        "fontFile": "assets/fonts/BMJUA_ttf.ttf"
       }
     },
     {
@@ -259,9 +280,9 @@
       "sourcePage": 10,
       "materialChange": "플렉스·실사 출력과 디지털 폰트가 확산되고, 사진·그림·풀컬러 LED 전광판이 더해졌다.",
       "specimen": {
-        "typeFamily": "디지털 폰트·실사 출력",
+        "typeFamily": "도현체 · 디지털 고딕",
         "material": "플렉스·디지털 프린팅",
-        "fontClass": "digital",
+        "fontClass": "era-1990",
         "palette": [
           {
             "hex": "#E60012",
@@ -285,7 +306,10 @@
           }
         ],
         "sourcePage": 10,
-        "note": "PDF의 서체 계열·대표 색채를 재구성한 견본이며, 역사적 원본 폰트나 실측 색채가 아님."
+        "note": "시대별 서체 특징을 서로 다른 현대 글꼴로 보여주는 견본. 2010년대는 공식 배포 을지로체, 2020년대는 공식 을지로10년후체. 초기 시대의 실제 디지털 폰트 사용 사실을 뜻하지 않음.",
+        "fontFamily": "Era1990",
+        "fontName": "도현체",
+        "fontFile": "assets/fonts/BMDOHYEON_ttf.ttf"
       }
     },
     {
@@ -295,9 +319,9 @@
       "sourcePage": 11,
       "materialChange": "금속 입체문자에 LED를 넣는 채널간판과 고해상도 음식·인물 사진 간판이 확산되었다.",
       "specimen": {
-        "typeFamily": "채널 입체문자·사진과 원색 문구",
+        "typeFamily": "한나체 Air · 입체문자",
         "material": "LED·금속 채널간판",
-        "fontClass": "digital",
+        "fontClass": "era-2000",
         "palette": [
           {
             "hex": "#FF1F4B",
@@ -321,7 +345,10 @@
           }
         ],
         "sourcePage": 11,
-        "note": "PDF의 서체 계열·대표 색채를 재구성한 견본이며, 역사적 원본 폰트나 실측 색채가 아님."
+        "note": "시대별 서체 특징을 서로 다른 현대 글꼴로 보여주는 견본. 2010년대는 공식 배포 을지로체, 2020년대는 공식 을지로10년후체. 초기 시대의 실제 디지털 폰트 사용 사실을 뜻하지 않음.",
+        "fontFamily": "Era2000",
+        "fontName": "한나체 Air",
+        "fontFile": "assets/fonts/BMHANNAAir_ttf.ttf"
       }
     },
     {
@@ -331,9 +358,9 @@
       "sourcePage": 12,
       "materialChange": "내용이 바뀌는 디지털광고물이 등장하고, 옛 간판 붓글씨와 시트지 글자가 디지털 서체로 재해석되었다.",
       "specimen": {
-        "typeFamily": "복고 서체의 디지털 재해석",
+        "typeFamily": "을지로체 · 간판 붓글씨",
         "material": "입체문자·디지털광고물",
-        "fontClass": "brush",
+        "fontClass": "era-2010",
         "palette": [
           {
             "hex": "#5E6B73",
@@ -357,7 +384,10 @@
           }
         ],
         "sourcePage": 12,
-        "note": "PDF의 서체 계열·대표 색채를 재구성한 견본이며, 역사적 원본 폰트나 실측 색채가 아님."
+        "note": "시대별 서체 특징을 서로 다른 현대 글꼴로 보여주는 견본. 2010년대는 공식 배포 을지로체, 2020년대는 공식 을지로10년후체. 초기 시대의 실제 디지털 폰트 사용 사실을 뜻하지 않음.",
+        "fontFamily": "Era2010",
+        "fontName": "을지로체",
+        "fontFile": "assets/fonts/BMEULJIROTTF.ttf"
       }
     },
     {
@@ -367,9 +397,9 @@
       "sourcePage": 12,
       "materialChange": "입체문자 중심의 정돈된 간판과 초대형 디지털 화면이 공존하며 빛과 화면 변화가 표현 수단이 되었다.",
       "specimen": {
-        "typeFamily": "복고 서체·디지털 글자",
+        "typeFamily": "을지로10년후체 · 복고 글씨",
         "material": "입체문자·디지털 화면",
-        "fontClass": "gothic",
+        "fontClass": "era-2020",
         "palette": [
           {
             "hex": "#5E6B73",
@@ -393,7 +423,10 @@
           }
         ],
         "sourcePage": 12,
-        "note": "PDF의 서체 계열·대표 색채를 재구성한 견본이며, 역사적 원본 폰트나 실측 색채가 아님."
+        "note": "시대별 서체 특징을 서로 다른 현대 글꼴로 보여주는 견본. 2010년대는 공식 배포 을지로체, 2020년대는 공식 을지로10년후체. 초기 시대의 실제 디지털 폰트 사용 사실을 뜻하지 않음.",
+        "fontFamily": "Era2020",
+        "fontName": "을지로10년후체",
+        "fontFile": "assets/fonts/BMEuljiro10yearslater.ttf"
       }
     }
   ],
@@ -2037,6 +2070,11 @@
       "black": 300,
       "stagger": 150,
       "photoFade": 1000
+    },
+    "question": {
+      "lead": "간판 개선 사업은 사업의 목적 중",
+      "text": "거리의 시각적 환경을 실제로 개선했는가?",
+      "emphasis": "환경"
     }
   }
 }

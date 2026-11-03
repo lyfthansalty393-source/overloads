@@ -160,3 +160,42 @@ body.ending-mode #model-layer,body.ending-mode #stage,body.ending-mode #archive,
  #archive .photo-button.scroll-selected:hover,#archive .photo-button[aria-current="true"]:hover{transform:translate(-12px,-5px)}
  #archive .era-label{font-size:18px!important;letter-spacing:-.8px;margin-right:2px}
 }
+
+/* Actual per-era font assets; paragraphs retain the readable body face. */
+@font-face{font-family:Era1910;src:url('./assets/fonts/Era1910Specimen.otf') format('opentype');font-weight:400;font-style:normal;font-display:swap}
+#specimen-glyph.era-1910,.era-event[data-year="1910"] h2{font-family:Era1910,serif;font-weight:400}
+@font-face{font-family:Era1920;src:url('./assets/fonts/NanumMyeongjo-Regular.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap}
+#specimen-glyph.era-1920,.era-event[data-year="1920"] h2{font-family:Era1920,serif;font-weight:400}
+@font-face{font-family:Era1930;src:url('./assets/fonts/NanumBrushScript-Regular.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap}
+#specimen-glyph.era-1930,.era-event[data-year="1930"] h2{font-family:Era1930,serif;font-weight:400}
+@font-face{font-family:Era1950;src:url('./assets/fonts/NanumPenScript-Regular.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap}
+#specimen-glyph.era-1950,.era-event[data-year="1950"] h2{font-family:Era1950,serif;font-weight:400}
+@font-face{font-family:Era1960;src:url('./assets/fonts/BMYEONSUNG_ttf.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap}
+#specimen-glyph.era-1960,.era-event[data-year="1960"] h2{font-family:Era1960,serif;font-weight:400}
+@font-face{font-family:Era1970;src:url('./assets/fonts/BMHANNA_11yrs_ttf.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap}
+#specimen-glyph.era-1970,.era-event[data-year="1970"] h2{font-family:Era1970,serif;font-weight:400}
+@font-face{font-family:Era1980;src:url('./assets/fonts/BMJUA_ttf.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap}
+#specimen-glyph.era-1980,.era-event[data-year="1980"] h2{font-family:Era1980,serif;font-weight:400}
+@font-face{font-family:Era1990;src:url('./assets/fonts/BMDOHYEON_ttf.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap}
+#specimen-glyph.era-1990,.era-event[data-year="1990"] h2{font-family:Era1990,serif;font-weight:400}
+@font-face{font-family:Era2000;src:url('./assets/fonts/BMHANNAAir_ttf.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap}
+#specimen-glyph.era-2000,.era-event[data-year="2000"] h2{font-family:Era2000,serif;font-weight:400}
+@font-face{font-family:Era2010;src:url('./assets/fonts/BMEULJIROTTF.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap}
+#specimen-glyph.era-2010,.era-event[data-year="2010"] h2{font-family:Era2010,serif;font-weight:400}
+@font-face{font-family:Era2020;src:url('./assets/fonts/BMEuljiro10yearslater.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap}
+#specimen-glyph.era-2020,.era-event[data-year="2020"] h2{font-family:Era2020,serif;font-weight:400}
+
+#ending-question-panel{position:absolute;inset:0;z-index:4;display:flex;align-items:center;justify-content:center;flex-direction:column;padding:7vw;opacity:0;pointer-events:none;transition:opacity .65s ease}
+#ending-question{font-family:Pretendard,sans-serif;color:#fafafa;font-size:clamp(28px,2.4vw,44px);line-height:1.65;text-align:center;margin:0;word-break:keep-all;max-width:1100px}
+#ending-question .question-lead{display:block;font-size:24px;font-weight:400;margin-bottom:12px;color:rgb(250 250 250 / .8)}
+#ending-question strong{font-weight:750;color:#c3d132}
+#ending-home{display:block;margin-top:30px;background:transparent;color:#fafafa;padding:10px 22px;font-size:40px;line-height:1;border:0;outline:0}
+#ending-home:hover,#ending-home:focus-visible{color:#c3d132;transform:translateY(-3px)}
+#ending-scene.question-mode #ending-question-panel{opacity:1;pointer-events:auto}
+#ending-collage{transition:opacity .65s ease}
+#ending-scene.question-mode #ending-collage{opacity:.25}
+#ending-scene.question-mode #ending-message{opacity:0;pointer-events:none}
+#ending-scene.question-mode::after{opacity:0}
+#ending-scene.question-mode #ending-back{z-index:5}
+#ending-scene{touch-action:none}
+@media(max-width:700px){#ending-question{font-size:28px;line-height:1.6}#ending-question .question-lead{font-size:20px}#ending-question-panel{padding:24px}}

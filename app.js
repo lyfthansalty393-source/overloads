@@ -313,6 +313,7 @@ function updateTimeline(year) {
   $('#specimen-glyph').className=specimen.fontClass;
   $('#specimen-material').textContent=specimen.material;
   $('#specimen-type').textContent=specimen.typeFamily;
+  const loadingYear=year;document.fonts.load(`128px ${specimen.fontFamily}`).then(()=>{if(current?.era===loadingYear)centerActiveEra('instant');});
   $('#specimen-colors').replaceChildren();
   for(const color of specimen.palette){
     const swatch=document.createElement('span');swatch.style.backgroundColor=color.hex;
@@ -615,6 +616,7 @@ function stopEnding(){
   $('#ending-scene').hidden=true;$('#ending-scene').dataset.phase='idle';
   $('#ending-intro').removeAttribute('src');$('#ending-intro').hidden=true;
   $('#ending-collage').replaceChildren();$('#ending-message').classList.remove('visible');
+  $('#ending-scene').classList.remove('question-mode');$('#ending-question-panel').hidden=true;endingQuestionDelta=0;
 }
 function endingLater(callback,ms,token){
   endingTimers.push(setTimeout(()=>{if(token===endingGeneration)callback();},ms));
@@ -677,6 +679,30 @@ async function startEnding(previous){
     endingLater(()=>revealEndingPhotos(token),reduced?0:config.timing.black,token);
   }
 }
+let endingQuestionDelta=0,endingTouchY;
+function showEndingQuestion(){
+  if($('#ending-scene').dataset.phase!=='collage')return;
+  $('#ending-question-panel').hidden=false;
+  requestAnimationFrame(()=>{if(!$('#ending-scene').hidden){$('#ending-scene').classList.add('question-mode');$('#ending-home').focus({preventScroll:true});}});
+}
+function hideEndingQuestion(){
+  $('#ending-scene').classList.remove('question-mode');$('#ending-question-panel').hidden=true;endingQuestionDelta=0;
+}
+function moveEndingQuestion(delta){
+  if($('#ending-scene').dataset.phase!=='collage')return;
+  endingQuestionDelta+=delta;
+  if(endingQuestionDelta>=80){showEndingQuestion();endingQuestionDelta=0;}
+  else if(endingQuestionDelta<=-80){hideEndingQuestion();}
+}
+$('#ending-scene').addEventListener('wheel',e=>{e.preventDefault();e.stopPropagation();moveEndingQuestion(e.deltaY*(e.deltaMode===1?16:e.deltaMode===2?innerHeight:1));},{passive:false});
+$('#ending-scene').addEventListener('touchstart',e=>endingTouchY=e.touches[0].clientY,{passive:true});
+$('#ending-scene').addEventListener('touchmove',e=>{if(endingTouchY==null)return;e.preventDefault();const y=e.touches[0].clientY;moveEndingQuestion(endingTouchY-y);endingTouchY=y;},{passive:false});
+$('#ending-scene').addEventListener('touchend',()=>endingTouchY=null);
+$('#ending-scene').addEventListener('keydown',e=>{
+  if(['ArrowDown','PageDown'].includes(e.key)){e.preventDefault();e.stopPropagation();showEndingQuestion();}
+  else if(['ArrowUp','PageUp'].includes(e.key)){e.preventDefault();e.stopPropagation();hideEndingQuestion();}
+});
+$('#ending-home').addEventListener('click',()=>{navigateTo(0,true);archiveNode.scrollTo({top:0,behavior:'instant'});activeButton?.focus({preventScroll:true});});
 function leaveEnding(){navigateTo(endingReturnIndex,true);activeButton?.focus({preventScroll:true});}
 $('#ending-back').addEventListener('click',leaveEnding);
 addEventListener('keydown',e=>{if(!$('#ending-scene').hidden&&e.key==='Escape'){e.preventDefault();leaveEnding();}});
