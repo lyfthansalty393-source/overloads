@@ -102,3 +102,24 @@ html,body{height:100%;overflow:hidden;overscroll-behavior:none}
 }
 #era-scroll{padding-bottom:20px}
 #eras{padding-bottom:55vh}
+
+/* Final type scale: active era / its text 18px; all other captions 16px. */
+.era-event .era-number,.era-event .era-suffix,.era-event p{font-size:16px;letter-spacing:0}
+.era-event.active .era-number,.era-event.active .era-suffix,.era-event.active p{font-size:18px;letter-spacing:0}
+#photo-year{font-size:18px}#photo-description{font-size:16px}
+#archive .era-group .era-label{font-size:16px}#archive .era-group.active-era .era-label{font-size:18px}
+#timeline-bottom-scroll{cursor:ns-resize}
+#ending-scene{position:fixed;inset:0;z-index:10;background:#101010;overflow:hidden;isolation:isolate}
+#ending-intro{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity 1.1s ease}
+#ending-scene[data-phase="intro"] #ending-intro{opacity:1}
+#ending-scene[data-phase="fade-out"] #ending-intro{opacity:0}
+#ending-collage{position:absolute;inset:0;overflow:hidden}
+#ending-collage img{position:absolute;display:block;object-fit:contain;opacity:0;transition:opacity 1s ease;max-width:none;box-shadow:0 0 0 1px rgb(16 16 16 / .2)}
+#ending-collage img.visible{opacity:1}
+#ending-message{position:absolute;left:8%;right:8%;bottom:4%;margin:0;text-align:center;font-family:Pretendard,sans-serif;font-size:18px;line-height:1.8;color:#fafafa;text-shadow:0 1px 8px #101010,0 1px 24px #101010;opacity:0;transition:opacity 1.2s ease;z-index:2}
+#ending-message.visible{opacity:1}
+#ending-back{position:absolute;top:24px;left:24px;z-index:3;background:transparent;border:0;outline:0;text-decoration:none;font-family:Pretendard,sans-serif;font-size:14pt;letter-spacing:-.3px;color:#fafafa;text-shadow:0 1px 8px #101010;padding:12px 0}
+body.ending-mode #model-layer,body.ending-mode #stage,body.ending-mode #archive,body.ending-mode #timeline,body.ending-mode #timeline-scroll-zone{visibility:hidden;pointer-events:none}
+@media(prefers-reduced-motion:reduce){#ending-scene *{transition:none!important}}
+#ending-scene::after{content:"";position:absolute;inset:72% 0 0;z-index:1;pointer-events:none;background:linear-gradient(transparent,rgb(16 16 16 / .8));opacity:0;transition:opacity 1s ease}
+#ending-scene[data-phase="collage"]::after{opacity:1}

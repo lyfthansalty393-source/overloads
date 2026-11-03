@@ -256,6 +256,8 @@ addEventListener('resize',resize);
 
 async function selectPhoto(photo) {
   if(current?.id===photo.id)return;
+  const previous=current;
+  stopEnding();
   const request=++generation;loadingPhoto=true;
   current=photo;currentConfig=photo.spatial?structuredClone(configMap.get(photo.id)):null;entrance=0;
   rotationX=photo.spatial?.10:0;rotationY=photo.spatial?.18:0;rotationZ=0;targetModelZoom=1;
@@ -267,6 +269,10 @@ async function selectPhoto(photo) {
   if(activeButton)activeButton.removeAttribute('aria-current');
   activeButton=buttons.get(photo.id);activeButton?.setAttribute('aria-current','true');
   updateTimeline(photo.era);resize();
+  if(photo.kind==='ending'){
+    loadingPhoto=false;document.documentElement.dataset.ready='true';
+    startEnding(previous);return;
+  }
   try {
     const texture=await loader.loadAsync(photo.src);
     if(request!==generation){texture.dispose();return;}
@@ -375,12 +381,25 @@ function scrollRightTimeline(e){
 }
 $('#timeline').addEventListener('wheel',scrollRightTimeline,{passive:false});
 $('#timeline-scroll-zone').addEventListener('wheel',scrollRightTimeline,{passive:false});
+let structureDelta=0;
+function moveStructure(delta){
+  structureDelta+=delta;
+  while(Math.abs(structureDelta)>=110){
+    const direction=Math.sign(structureDelta);structureDelta-=direction*110;
+    navigateTo(Math.round(targetTravel)+direction,true);
+  }
+}
+$('#timeline-bottom-scroll').addEventListener('wheel',e=>{
+  e.preventDefault();e.stopPropagation();
+  moveStructure(e.deltaY*(e.deltaMode===1?16:e.deltaMode===2?innerHeight:1));
+},{passive:false});
 for(const zone of [$('#timeline-scroll-zone'),$('#timeline-bottom-scroll')]){
   let touchY;
   zone.addEventListener('touchstart',e=>{touchY=e.touches[0].clientY;},{passive:true});
   zone.addEventListener('touchmove',e=>{
     if(touchY==null)return;e.preventDefault();e.stopPropagation();
-    const y=e.touches[0].clientY;$('#era-scroll').scrollTop+=touchY-y;touchY=y;
+    const y=e.touches[0].clientY;const delta=touchY-y;
+    if(zone.id==='timeline-bottom-scroll')moveStructure(delta);else $('#era-scroll').scrollTop+=delta;touchY=y;
   },{passive:false});
   zone.addEventListener('touchend',()=>touchY=null);
   zone.addEventListener('touchcancel',()=>touchY=null);
@@ -490,10 +509,9 @@ function render(time=0) {
   travelVelocity+=(displacement*110-travelVelocity*20)*dt;
   travel+=travelVelocity*dt;
   if(Math.abs(displacement)<.0001&&Math.abs(travelVelocity)<.001){travel=targetTravel;travelVelocity=0;}
-  const index=clamp(Math.round(travel),0,archive.photos.length-1);
-  if(Math.abs(targetTravel-travel)<.6 && current?.id!==archive.photos[index].id)selectPhoto(archive.photos[index]);
   const damping=1-Math.exp(-dt*6);
   entrance+=(1-entrance)*(reduced?1:damping);
+  if(current?.kind==='ending')return;
   const orbitMoving=modelRig.quaternion.angleTo(targetModelRotation)>.00001||Math.abs(Math.log(targetModelZoom)-Math.log(modelZoom))>.00001;
   if(modelPointers.size)modelRig.quaternion.copy(targetModelRotation);
   else modelRig.quaternion.slerp(targetModelRotation,damping);
@@ -568,6 +586,82 @@ if(debug) {
   $('#sky-mode').addEventListener('change',e=>{currentConfig.sky.mode=e.target.value;configMap.set(current.id,structuredClone(currentConfig));rebuild();refreshDebugPanel();});
   $('#export-config').addEventListener('click',()=>{const url=URL.createObjectURL(new Blob([JSON.stringify([...configMap.values()],null,2)],{type:'application/json'}));const link=document.createElement('a');link.href=url;link.download='projections.json';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);});
 }
+// The final scene never creates a photo room. All assets are supplied photographs.
+let endingGeneration=0,endingTimers=[],endingReturnIndex=archive.photos.length-2;
+function stopEnding(){
+  endingGeneration++;
+  for(const timer of endingTimers)clearTimeout(timer);endingTimers=[];
+  document.body.classList.remove('ending-mode');
+  $('#ending-scene').hidden=true;$('#ending-scene').dataset.phase='idle';
+  $('#ending-intro').removeAttribute('src');$('#ending-intro').hidden=true;
+  $('#ending-collage').replaceChildren();$('#ending-message').classList.remove('visible');
+}
+function endingLater(callback,ms,token){
+  endingTimers.push(setTimeout(()=>{if(token===endingGeneration)callback();},ms));
+}
+function randomNumber(){const a=new Uint32Array(1);crypto.getRandomValues(a);return a[0]/4294967296;}
+function layoutEnding(){
+  const photos=[...$('#ending-collage').children],count=photos.length;
+  const cols=innerWidth<700?3:6,rows=Math.ceil(count/cols);
+  photos.forEach((img,i)=>{
+    const ratio=Number(img.dataset.ratio),cell=Number(img.dataset.cell);
+    const targetWidth=innerWidth*(innerWidth<700?.5+Number(img.dataset.scale)*.25:.22+Number(img.dataset.scale)*.13);
+    const w=Math.min(targetWidth,innerHeight*.38*ratio),h=w/ratio;
+    const cx=((cell%cols)+.5+Number(img.dataset.jitterX)*.32)/cols*innerWidth;
+    const cy=(Math.floor(cell/cols)+.5+Number(img.dataset.jitterY)*.32)/rows*innerHeight;
+    img.style.width=`${w}px`;img.style.height=`${h}px`;
+    img.style.left=`${clamp(cx-w/2,0,Math.max(0,innerWidth-w))}px`;
+    img.style.top=`${clamp(cy-h/2,0,Math.max(0,innerHeight-h))}px`;
+  });
+}
+function revealEndingPhotos(token){
+  const config=archive.ending,container=$('#ending-collage');
+  $('#ending-scene').dataset.phase='collage';
+  const shuffled=config.photos.map((photo,i)=>({photo,order:randomNumber()})).sort((a,b)=>a.order-b.order);
+  const cells=shuffled.map((_,i)=>i).sort(()=>randomNumber()-.5);
+  shuffled.forEach(({photo},i)=>{
+    const img=document.createElement('img');img.alt='간판과 광고가 겹쳐 있는 상점과 거리';img.src=photo.src;
+    img.width=photo.width;img.height=photo.height;img.decoding='async';
+    img.dataset.ratio=photo.width/photo.height;img.dataset.cell=cells[i];img.dataset.scale=randomNumber();
+    img.dataset.jitterX=randomNumber()*2-1;img.dataset.jitterY=randomNumber()*2-1;
+    img.style.aspectRatio=`${photo.width} / ${photo.height}`;container.append(img);
+    // Visibility begins only after the actual image decodes, so every photograph
+    // emerges from black instead of popping in after an already-finished fade.
+    img.decode().then(()=>{
+      endingLater(()=>{requestAnimationFrame(()=>requestAnimationFrame(()=>{if(token===endingGeneration)img.classList.add('visible');}));},reduced?0:i*config.timing.stagger,token);
+    }).catch(error=>console.error('Ending photo failed',photo.src,error));
+  });
+  layoutEnding();
+  $('#ending-message').textContent=config.message;
+  endingLater(()=>$('#ending-message').classList.add('visible'),reduced?0:config.photos.length*config.timing.stagger+config.timing.photoFade,token);
+}
+async function startEnding(previous){
+  const token=endingGeneration,config=archive.ending;
+  endingReturnIndex=previous&&previous.kind!=='ending'?photoIndex.get(previous.id):archive.photos.length-2;
+  document.body.classList.add('ending-mode');$('#ending-scene').hidden=false;$('#ending-scene').dataset.phase='black';
+  $('#ending-back').focus({preventScroll:true});
+  window.__signArchive={id:current.id,faces:[],ending:true,phase:'black',introPending:!config.intro};
+  if(config.intro){
+    const img=$('#ending-intro');img.src=typeof config.intro==='string'?config.intro:config.intro.src;
+    try{await img.decode();}catch(error){console.error('Ending intro failed',error);return;}
+    if(token!==endingGeneration)return;
+    img.hidden=false;$('#ending-scene').dataset.phase='intro';
+    endingLater(()=>{
+      $('#ending-scene').dataset.phase='fade-out';
+      endingLater(()=>{img.hidden=true;$('#ending-scene').dataset.phase='black';
+        endingLater(()=>revealEndingPhotos(token),reduced?0:config.timing.black,token);
+      },reduced?0:config.timing.fade,token);
+    },reduced?0:config.timing.hold,token);
+  }else{
+    // Do not substitute a different photo for the missing inline panorama.
+    endingLater(()=>revealEndingPhotos(token),reduced?0:config.timing.black,token);
+  }
+}
+function leaveEnding(){navigateTo(endingReturnIndex,true);activeButton?.focus({preventScroll:true});}
+$('#ending-back').addEventListener('click',leaveEnding);
+addEventListener('keydown',e=>{if(!$('#ending-scene').hidden&&e.key==='Escape'){e.preventDefault();leaveEnding();}});
+addEventListener('resize',()=>{if(!$('#ending-scene').hidden)layoutEnding();});
+
 // Both spatial photographs and standalone signs participate in navigation.
 if(archive.photos.length)await selectPhoto(archive.photos[0]);
 await Promise.all([...$('#archive').querySelectorAll('img')].filter(i=>i.loading!=='lazy').map(i=>i.decode().catch(()=>{})));

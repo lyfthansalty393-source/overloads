@@ -1,6 +1,6 @@
 """Build single.html from the reviewed split sources, using only Python stdlib.
 
-Photos remain byte-identical shared files in assets/photos. No CDN is required.
+Photos and finale assets remain shared files in assets/. No CDN is required.
 """
 from pathlib import Path
 import base64
@@ -19,4 +19,4 @@ for element, filename in [('archive-data', 'archive.json'), ('projection-data', 
 html = html.replace('<script type="module" src="app.js"></script>',
                     '<script type="module">\n' + js.replace('</script', '<\\/script') + '\n</script>')
 (root / 'single.html').write_text(html)
-print('Built single.html; retain assets/photos alongside it.')
+print('Built single.html; retain the full assets/ directory alongside it.')

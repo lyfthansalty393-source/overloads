@@ -1853,6 +1853,19 @@
       "filename": "2020-12.png",
       "descriptionBasis": "첨부 원본 사진의 시각적 내용",
       "articleVerification": "pending-network-access"
+    },
+    {
+      "id": "2020-ending",
+      "src": "assets/ending/qqq-01.webp",
+      "filename": "2020-ending",
+      "year": 2020,
+      "era": 2020,
+      "width": 6000,
+      "height": 4000,
+      "spatial": false,
+      "kind": "ending",
+      "description": "간판 개선 사업을 했지만, 그 뒤에도 정보의 과부하는 끝나지 않았다.",
+      "descriptionBasis": "사용자 요청 엔딩 메시지와 첨부 압축 사진"
     }
   ],
   "captionResearch": {
@@ -1862,5 +1875,164 @@
     ],
     "status": "pending-network-access",
     "note": "두 원문은 네트워크 정책 403으로 아직 읽지 못함. 개별 설명은 첨부 사진을 직접 관찰해 작성했으며 기사 캡션으로 검증된 내용이 아님."
+  },
+  "ending": {
+    "intro": null,
+    "introPending": true,
+    "introNote": "본문에 표시된 파노라마의 원본 파일 별도 첨부 필요. 임의 사진으로 대체하지 않음.",
+    "photos": [
+      {
+        "src": "assets/ending/qqq-01.webp",
+        "width": 6000,
+        "height": 4000,
+        "archive": "qqq.zip",
+        "originalName": "IMG_2932.jpg",
+        "originalSrc": "assets/ending/originals/qqq-01.jpg"
+      },
+      {
+        "src": "assets/ending/qqq-02.webp",
+        "width": 4893,
+        "height": 3262,
+        "archive": "qqq.zip",
+        "originalName": "IMG_2930 복사.jpg",
+        "originalSrc": "assets/ending/originals/qqq-02.jpg"
+      },
+      {
+        "src": "assets/ending/qqq-03.webp",
+        "width": 6000,
+        "height": 4000,
+        "archive": "qqq.zip",
+        "originalName": "IMG_2932_1.jpg",
+        "originalSrc": "assets/ending/originals/qqq-03.jpg"
+      },
+      {
+        "src": "assets/ending/qqq-04.webp",
+        "width": 6000,
+        "height": 4000,
+        "archive": "qqq.zip",
+        "originalName": "IMG_2922.jpg",
+        "originalSrc": "assets/ending/originals/qqq-04.jpg"
+      },
+      {
+        "src": "assets/ending/qqq-05.webp",
+        "width": 6000,
+        "height": 4000,
+        "archive": "qqq.zip",
+        "originalName": "IMG_2926.jpg",
+        "originalSrc": "assets/ending/originals/qqq-05.jpg"
+      },
+      {
+        "src": "assets/ending/qqq-06.webp",
+        "width": 5436,
+        "height": 3624,
+        "archive": "qqq.zip",
+        "originalName": "IMG_2910 복사.jpg",
+        "originalSrc": "assets/ending/originals/qqq-06.jpg"
+      },
+      {
+        "src": "assets/ending/ppp-01.webp",
+        "width": 5388,
+        "height": 3592,
+        "archive": "ppp.zip",
+        "originalName": "IMG_2941 복사.jpg",
+        "originalSrc": "assets/ending/originals/ppp-01.jpg"
+      },
+      {
+        "src": "assets/ending/ppp-02.webp",
+        "width": 6000,
+        "height": 4000,
+        "archive": "ppp.zip",
+        "originalName": "IMG_2948.jpg",
+        "originalSrc": "assets/ending/originals/ppp-02.jpg"
+      },
+      {
+        "src": "assets/ending/ppp-03.webp",
+        "width": 5657,
+        "height": 3771,
+        "archive": "ppp.zip",
+        "originalName": "IMG_2949 복사.jpg",
+        "originalSrc": "assets/ending/originals/ppp-03.jpg"
+      },
+      {
+        "src": "assets/ending/ppp-04.webp",
+        "width": 6000,
+        "height": 4000,
+        "archive": "ppp.zip",
+        "originalName": "IMG_2951.jpg",
+        "originalSrc": "assets/ending/originals/ppp-04.jpg"
+      },
+      {
+        "src": "assets/ending/ppp-05.webp",
+        "width": 6000,
+        "height": 4000,
+        "archive": "ppp.zip",
+        "originalName": "IMG_2953 복사.jpg",
+        "originalSrc": "assets/ending/originals/ppp-05.jpg"
+      },
+      {
+        "src": "assets/ending/zzz-01.webp",
+        "width": 4499,
+        "height": 2999,
+        "archive": "zzz.zip",
+        "originalName": "IMG_2907 복사.jpg",
+        "originalSrc": "assets/ending/originals/zzz-01.jpg"
+      },
+      {
+        "src": "assets/ending/zzz-02.webp",
+        "width": 2784,
+        "height": 2118,
+        "archive": "zzz.zip",
+        "originalName": "1.jpg",
+        "originalSrc": "assets/ending/originals/zzz-02.jpg"
+      },
+      {
+        "src": "assets/ending/zzz-03.webp",
+        "width": 600,
+        "height": 450,
+        "archive": "zzz.zip",
+        "originalName": "3.jpg",
+        "originalSrc": "assets/ending/originals/zzz-03.jpg"
+      },
+      {
+        "src": "assets/ending/zzz-04.webp",
+        "width": 1280,
+        "height": 1167,
+        "archive": "zzz.zip",
+        "originalName": "5.jpg",
+        "originalSrc": "assets/ending/originals/zzz-04.jpg"
+      },
+      {
+        "src": "assets/ending/zzz-05.webp",
+        "width": 600,
+        "height": 450,
+        "archive": "zzz.zip",
+        "originalName": "6.jpg",
+        "originalSrc": "assets/ending/originals/zzz-05.jpg"
+      },
+      {
+        "src": "assets/ending/zzz-06.webp",
+        "width": 6000,
+        "height": 4000,
+        "archive": "zzz.zip",
+        "originalName": "IMG_2893.jpg",
+        "originalSrc": "assets/ending/originals/zzz-06.jpg"
+      },
+      {
+        "src": "assets/ending/zzz-07.webp",
+        "width": 5384,
+        "height": 3589,
+        "archive": "zzz.zip",
+        "originalName": "IMG_2898 복사.jpg",
+        "originalSrc": "assets/ending/originals/zzz-07.jpg"
+      }
+    ],
+    "message": "간판 개선 사업을 했지만, 그 뒤에도 정보의 과부하는 끝나지 않았다.",
+    "timing": {
+      "hold": 1500,
+      "fade": 1100,
+      "black": 300,
+      "stagger": 150,
+      "photoFade": 1000
+    }
   }
 }
