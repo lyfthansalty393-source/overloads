@@ -351,8 +351,7 @@ for(const era of archive.eras) {
   item.append(heading,material,policy);$('#eras').append(item);
 }
 
-// An upper semicircular conveyor, not a complete circular orbit. Photos enter
-// beside the right rule, pass behind the real model canvas, and leave at left.
+// A quarter-circle path: right upper edge to lower left, behind the model.
 let arcIdle;
 function navigateTo(index,immediate=false){
   targetTravel=clamp(index,0,archive.photos.length-1);
@@ -365,9 +364,12 @@ function arcGeometry(){
   const right=$('#timeline').getBoundingClientRect().left;
   const thumb=innerWidth<=700?62:120;
   const start=right-thumb/2,end=thumb/2;
-  return {cx:(start+end)/2,rx:Math.max(20,(start-end)/2),base:innerHeight*.70,ry:innerHeight*.40,thumb};
+  return {cx:start,rx:Math.max(20,start-end),base:innerHeight*.88,ry:innerHeight*.76,thumb};
 }
-function pointOnArc(u,g){return {x:g.cx+g.rx*Math.cos(Math.PI*u),y:g.base-g.ry*Math.sin(Math.PI*u)};}
+function pointOnArc(u,g){
+  const angle=clamp(u,0,1)*Math.PI/2;
+  return {x:g.cx-g.rx*Math.sin(angle),y:g.base-g.ry*Math.cos(angle)};
+}
 function layoutPhotoArc(position){
   if(!buttons.size)return;
   const g=arcGeometry(),span=innerWidth<=700?6:8,anchor=.82;
