@@ -153,73 +153,28 @@ body.ending-mode #model-layer,body.ending-mode #stage,body.ending-mode #archive,
  #era-specimen{padding:10px 8px;gap:5px;min-height:180px}
 }
 
-/* An orbiting archive around a smaller, directly manipulated photo room. */
-#narrative-header{position:fixed;top:28px;left:48px;right:calc(var(--timeline-width) + 32px);z-index:4;pointer-events:none}
-#narrative-title{font-family:Pretendard,sans-serif;font-size:24px;line-height:1.6;margin:0 140px 8px 0;color:#fafafa}
-#story-stages{display:flex;gap:18px;pointer-events:auto}#story-stages button{background:none;padding:4px 0;color:rgb(250 250 250 / .35);font-size:18px;border-bottom:1px solid transparent}
-#story-stages button[aria-current]{color:#c3d132;border-bottom-color:#c3d132}
-#stage{left:24px;right:var(--timeline-width)}
-#archive{inset:0 var(--timeline-width) 0 24px;width:auto;height:100dvh;min-height:0;padding:0;overflow:visible;pointer-events:none;touch-action:none;z-index:2}
-#archive .era-group{display:contents}#archive .era-label{display:none}
-#archive .photo-button{position:absolute;margin:0;padding:0;max-width:none;pointer-events:auto;touch-action:none;cursor:grab;filter:brightness(.62);transform:translate(-50%,-50%) rotate(var(--tilt));transition:left .35s ease,top .35s ease,transform .25s ease,filter .2s ease;transform-origin:center}
-#archive .photo-button img{width:100%!important;height:100%;object-fit:contain;max-width:none;pointer-events:none;user-select:none}
-#archive .photo-button:hover,#archive .photo-button:focus-visible{filter:brightness(1);transform:translate(-50%,-50%) rotate(var(--tilt)) scale(1.13);z-index:4}
-#archive .photo-button[aria-current="true"]{filter:brightness(1);outline:1px solid #c3d132;outline-offset:6px;z-index:3}
-#archive .photo-button::after{display:none}#archive .photo-button::before{content:attr(data-year);position:absolute;left:0;top:calc(100% + 10px);font-size:20px;color:#c3d132;opacity:0;white-space:nowrap}
-#archive .photo-button[aria-current="true"]::before{opacity:1}
-body.orbit-dragging #archive .photo-button{transition:none;cursor:grabbing}
-#caption{position:fixed;bottom:24px;left:12vw;right:calc(var(--timeline-width) + 8vw);width:auto;max-height:112px;overflow:auto;z-index:3}
-#orbit-controls{position:fixed;bottom:156px;left:calc((100vw - var(--timeline-width))/2 - 74px);display:flex;gap:12px;z-index:4}
-#orbit-controls button{width:42px;height:42px;border:1px solid rgb(250 250 250 / .2);background:#101010;color:#fafafa;font-size:22px;border-radius:50%}
-#orbit-controls button:hover{border-color:#c3d132;color:#c3d132}#orbit-drag{touch-action:none;cursor:grab}
-#history-toggle{display:none}
-body.ending-mode #narrative-header,body.ending-mode #orbit-controls,body.ending-mode #history-toggle{visibility:hidden;pointer-events:none}
-#ending-intro{inset:12% 12% 18%;width:76%;height:70%;object-fit:contain}
-#ending-collage img{transition:opacity 1s ease,left .65s ease,top .65s ease,width .65s ease,height .65s ease;touch-action:none;cursor:grab;user-select:none}
-#ending-collage img:active{cursor:grabbing;transition:opacity .2s ease}
-#ending-message{top:43%;bottom:auto;left:28%;right:28%;font-size:24px;line-height:1.8}
-#ending-scene[data-layout="scattered"] #ending-message{top:auto;bottom:7%;left:10%;right:10%}
-#ending-scatter{position:absolute;bottom:24px;left:50%;transform:translateX(-50%);z-index:3;padding:10px 22px;background:#c3d132;color:#101010;font-family:Pretendard,sans-serif;font-size:20px;border:0}
-#ending-scene:not([data-phase="collage"]) #ending-scatter{visibility:hidden}
-@media(max-width:900px){
- #timeline{display:none;width:min(88vw,380px);z-index:7}body.history-open #timeline{display:flex}
- #timeline-scroll-zone{display:none}#stage{left:16px;right:16px}
- #archive{inset:0 12px 0;height:100dvh;width:auto}
- #narrative-header{left:20px;right:20px;top:20px}#narrative-title{font-size:24px;margin-right:60px;line-height:1.45}
- #story-stages button{font-size:18px}#history-toggle{display:block;position:fixed;right:16px;top:20px;z-index:8;font-size:18px;padding:5px;background:#101010;color:#c3d132}
- #caption{left:24px;right:24px;bottom:16px;max-height:112px;font-size:24px}
- #orbit-controls{left:calc(50% - 75px);bottom:144px}
- #archive .photo-button::before{font-size:16px}
- #ending-message{font-size:24px;left:22%;right:22%;top:38%}
- #ending-intro{inset:15% 6% 22%;width:88%;height:63%}
+/* Straight photo archive attached to the right panel's outside border. */
+:root{--photo-rail-width:144px}
+#archive{left:auto;right:var(--timeline-width);width:var(--photo-rail-width);height:100dvh;padding:22px 0 44vh 24px;border-right:1px solid #560e45;z-index:4;background:transparent}
+#archive .photo-button{margin-left:auto;margin-right:0}
+#archive .era-label{margin-left:0;margin-right:8px;text-align:right}
+#archive .photo-button.scroll-selected,#archive .photo-button[aria-current="true"]{transform:translateX(-24px)}
+#archive .photo-button.scroll-selected:hover,#archive .photo-button[aria-current="true"]:hover{transform:translate(-24px,-5px)}
+#stage{left:24px;right:calc(var(--timeline-width) + var(--photo-rail-width) + 12px)}
+@media(max-width:700px){
+ :root{--photo-rail-width:80px}
+ #archive{left:auto;right:var(--timeline-width);width:var(--photo-rail-width);padding-left:12px}
+ #stage{left:12px;right:calc(var(--timeline-width) + var(--photo-rail-width) + 8px)}
+ #archive .photo-button.scroll-selected,#archive .photo-button[aria-current="true"]{transform:translateX(-12px)}
+ #archive .photo-button.scroll-selected:hover,#archive .photo-button[aria-current="true"]:hover{transform:translate(-12px,-5px)}
+ #archive .era-label{font-size:18px!important;letter-spacing:-.8px;margin-right:2px}
 }
-@media(prefers-reduced-motion:reduce){#archive .photo-button,#ending-collage img{transition:none!important}}
-
-#archive{z-index:4}
-#orbit-controls{left:48px;bottom:24px;z-index:5}
-#narrative-header{z-index:5}
-@media(max-width:900px){#orbit-controls{left:calc(50% - 75px);bottom:144px}}
-#ending-collage{z-index:0;isolation:isolate}
 
 </style>
 </head>
 <body>
   <div id="model-layer"><canvas id="scene" aria-label="360도 XYZ 회전 및 확대 가능한 5면 공간 모델"></canvas></div>
-  <header id="narrative-header">
-    <p id="narrative-title">거리를 채우던 간판은 왜 정비의 대상이 되었을까?</p>
-    <nav id="story-stages" aria-label="이야기 단계">
-      <button type="button" data-story="0" aria-label="거리를 채우던 간판은 왜 정비의 대상이 되었을까?" aria-current="step">01</button>
-      <button type="button" data-story="1" aria-label="간판 개선 사업을 했지만, 그 뒤에도 정보의 과부하는 끝나지 않았다">02</button>
-      <button type="button" data-story="2" aria-label="개선된 간판, 흩어진 정보">03</button>
-    </nav>
-  </header>
-  <nav id="archive" aria-label="모델을 둘러싼 연대순 사진 궤도"></nav>
-  <div id="orbit-controls" aria-label="사진 궤도 조작">
-    <button id="orbit-prev" type="button" aria-label="이전 사진">←</button>
-    <button id="orbit-drag" type="button" aria-label="좌우로 드래그하여 사진 궤도 회전">↔</button>
-    <button id="orbit-next" type="button" aria-label="다음 사진">→</button>
-  </div>
-  <button id="history-toggle" type="button" aria-expanded="false" aria-controls="timeline">연표</button>
+  <nav id="archive" aria-label="연대순 사진"></nav>
   <main id="stage" aria-label="공간 사진">
     <div id="picture-frame">
       <img id="fallback" alt="" hidden>
@@ -240,7 +195,6 @@ body.ending-mode #narrative-header,body.ending-mode #orbit-controls,body.ending-
     <img id="ending-intro" alt="상가 건물의 외벽을 채운 간판들" hidden>
     <div id="ending-collage" aria-label="겹쳐 나타나는 간판 사진들"></div>
     <p id="ending-message"></p>
-    <button id="ending-scatter" type="button">흩어 보기</button>
     <button id="ending-back" type="button">- 돌아가기</button>
   </section>
   <dialog id="enlarged" aria-label="확대한 사진">
@@ -4243,8 +4197,6 @@ let dirty = true, disposed = false;
 let travel=0, targetTravel=0, travelVelocity=0;
 let entrance=0, lastFrame=0;
 const photoIndex=new Map(archive.photos.map((p,i)=>[p.id,i]));
-let orbitAngle=0,orbitDidDrag=false,orbitDragState=null;
-let requestedEndingMode='gathered',endingMode='gathered';
 const frame = $('#picture-frame');
 const canvas = $('#scene');
 const modelLayer = $('#model-layer');
@@ -4464,12 +4416,11 @@ function rebuild() {
 function resize() {
   if(!current)return;
   const stage=$('#stage'), aspect=current.width/current.height;
-  const availableWidth=stage.clientWidth*(innerWidth<=900?.72:.55);
-  const width=Math.min(availableWidth,innerHeight*.5*aspect);
+  const availableWidth=stage.clientWidth*(innerWidth<=700?.94:.72);
+  const width=Math.min(availableWidth,innerHeight*.66*aspect);
   frame.style.width=`${width}px`;frame.style.height=`${width/aspect}px`;
   if(renderer) {renderer.setSize(innerWidth,innerHeight,false);camera.aspect=innerWidth/innerHeight;}
-  refreshOrbit();
-  const panelLeft=innerWidth<=900?innerWidth:$('#timeline').getBoundingClientRect().left;
+  const panelLeft=archiveNode.getBoundingClientRect().left;
   const zoneLeft=Math.min(panelLeft,frame.getBoundingClientRect().right+12);
   $('#timeline-scroll-zone').style.left=`${zoneLeft}px`;
   $('#timeline-scroll-zone').style.width=`${Math.max(0,panelLeft-zoneLeft)}px`;
@@ -4542,8 +4493,7 @@ for(const era of archive.eras) {
     // A single uniform scale per thumbnail; portrait and landscape ratios stay original.
     const scale=Math.min(1,180/Math.max(photo.width,photo.height));
     img.style.width=`${photo.width*scale}px`;
-    button.append(img);button.addEventListener('click',e=>{if(e.detail&&orbitDidDrag)return;navigateTo(photoIndex.get(photo.id));});
-    button.dataset.year=`${photo.year}s`;
+    button.append(img);button.addEventListener('click',()=>{clearTimeout(archiveIdle);archiveHasGesture=false;archiveSnap=false;navigateTo(photoIndex.get(photo.id));});
     buttons.set(photo.id,button);section.append(button);
   }
   $('#archive').append(section);
@@ -4557,72 +4507,38 @@ for(const era of archive.eras) {
   item.append(heading,material,policy);$('#eras').append(item);
 }
 
-// The archive is a rotating ring, not a scroll column. All photos remain
-// selectable via drag, arrows, keyboard, and the clickable era headings.
-function navigateTo(index,immediate=false){
+// Two independent input regions: archive scroll selects, model wheel zooms.
+let archiveIdle, archiveSnap=false, archiveHasGesture=false;
+function navigateTo(index, immediate=false) {
   targetTravel=clamp(index,0,archive.photos.length-1);
   if(immediate||reduced){travel=targetTravel;travelVelocity=0;}
-  selectPhoto(archive.photos[Math.round(targetTravel)]);dirty=true;
+  selectPhoto(archive.photos[Math.round(targetTravel)]);
+  dirty=true;
 }
 function onScroll(){dirty=true;}
-function refreshOrbit(){
-  if(!current)return;
-  const mobile=innerWidth<=900,slots=mobile?8:14;
-  const index=photoIndex.get(current.id),count=Math.min(slots,archive.photos.length);
-  const start=clamp(index-Math.floor(count/2),0,archive.photos.length-count);
-  const region=archiveNode.getBoundingClientRect(),image=frame.getBoundingClientRect();
-  const cx=image.left+image.width/2-region.left,cy=image.top+image.height/2-region.top;
-  const rx=Math.max(100,region.width*(mobile?.405:.415));
-  const ry=Math.max(100,Math.min(innerHeight*(mobile?.24:.33),image.top+image.height/2-(mobile?150:140),innerHeight-150-(image.top+image.height/2)));
-  for(const button of buttons.values())button.hidden=true;
-  for(let i=0;i<count;i++){
-    const photo=archive.photos[start+i],button=buttons.get(photo.id),relative=start+i-index;
-    const angle=-Math.PI/2+relative*Math.PI*2/count+orbitAngle;
-    const scale=Math.min((mobile?70:112)/photo.width,(mobile?56:86)/photo.height);
-    button.hidden=false;button.style.width=`${photo.width*scale}px`;button.style.height=`${photo.height*scale}px`;
-    button.style.left=`${cx+Math.cos(angle)*rx}px`;button.style.top=`${cy+Math.sin(angle)*ry}px`;
-    button.style.setProperty('--tilt',`${angle*180/Math.PI+90}deg`);
-  }
+function nearestArchivePhoto(){
+  const marker=archiveNode.getBoundingClientRect().top+archiveNode.clientHeight*.42;
+  let best=archive.photos[0],distance=Infinity;
+  for(const photo of archive.photos){const r=buttons.get(photo.id).getBoundingClientRect();const d=Math.abs((r.top+r.bottom)/2-marker);if(d<distance){distance=d;best=photo;}}
+  return best;
 }
-function ringCenter(){const r=frame.getBoundingClientRect();return {x:r.left+r.width/2,y:r.top+r.height/2};}
-function startOrbit(e){
-  if(e.button!==0)return;
-  orbitDidDrag=false;const center=ringCenter();
-  orbitDragState={x:e.clientX,y:e.clientY,center,last:Math.atan2(e.clientY-center.y,e.clientX-center.x),handle:e.currentTarget.id==='orbit-drag'};
-  (e.target.closest('.photo-button')||e.currentTarget).setPointerCapture(e.pointerId);document.body.classList.add('orbit-dragging');e.stopPropagation();
-}
-function moveOrbit(e){
-  if(!orbitDragState)return;
-  const s=orbitDragState;
-  if(Math.hypot(e.clientX-s.x,e.clientY-s.y)>4)orbitDidDrag=true;
-  if(!orbitDidDrag)return;
-  if(s.handle){orbitAngle+=(e.clientX-s.x)*.006;s.x=e.clientX;s.y=e.clientY;}
-  else{const angle=Math.atan2(e.clientY-s.center.y,e.clientX-s.center.x);orbitAngle+=Math.atan2(Math.sin(angle-s.last),Math.cos(angle-s.last));s.last=angle;}
-  refreshOrbit();e.preventDefault();e.stopPropagation();
-}
-function endOrbit(){
-  if(!orbitDragState)return;orbitDragState=null;document.body.classList.remove('orbit-dragging');
-  if(orbitDidDrag){const step=Math.PI*2/(innerWidth<=900?8:14);const offset=Math.round(orbitAngle/step);orbitAngle=0;navigateTo(photoIndex.get(current.id)-offset,true);}
-  refreshOrbit();
-}
-for(const target of [archiveNode,$('#orbit-drag')]){
-  target.addEventListener('pointerdown',startOrbit);target.addEventListener('pointermove',moveOrbit);
-  target.addEventListener('pointerup',endOrbit);target.addEventListener('pointercancel',endOrbit);
-}
-$('#orbit-prev').addEventListener('click',()=>navigateTo(photoIndex.get(current.id)-1));
-$('#orbit-next').addEventListener('click',()=>navigateTo(photoIndex.get(current.id)+1));
-$('#eras').addEventListener('click',e=>{const heading=e.target.closest('h2');if(!heading)return;const year=Number(heading.parentElement.dataset.year);navigateTo(archive.photos.findIndex(p=>p.era===year));});
-for(const heading of $('#eras').querySelectorAll('h2')){heading.tabIndex=0;heading.setAttribute('role','button');heading.setAttribute('aria-label',`${heading.textContent} 사진 선택`);heading.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();heading.click();}});}
-$('#history-toggle').addEventListener('click',()=>{const open=document.body.classList.toggle('history-open');$('#history-toggle').setAttribute('aria-expanded',String(open));$('#history-toggle').textContent=open?'닫기':'연표';});
-$('#story-stages').addEventListener('click',e=>{
-  const button=e.target.closest('[data-story]');if(!button)return;
-  const step=Number(button.dataset.story);
-  if(step===0){if(current.kind==='ending')leaveEnding();return;}
-  requestedEndingMode=step===2?'scattered':'gathered';
-  if(current.kind==='ending'){endingMode=requestedEndingMode;layoutEnding();return;}
-  navigateTo(archive.photos.length-1,true);
-});
+archiveNode.addEventListener('wheel',()=>{archiveHasGesture=true;archiveSnap=false;},{passive:true});
+archiveNode.addEventListener('touchstart',()=>{archiveHasGesture=true;archiveSnap=false;},{passive:true});
 
+archiveNode.addEventListener('scroll',()=>{
+  if(!archiveHasGesture||archiveSnap)return;
+  const photo=nearestArchivePhoto();
+  navigateTo(photoIndex.get(photo.id),true);
+  clearTimeout(archiveIdle);
+  archiveIdle=setTimeout(()=>{
+    const button=buttons.get(photo.id);
+    const r=button.getBoundingClientRect(),nav=archiveNode.getBoundingClientRect();
+    const target=archiveNode.scrollTop+r.top-nav.top+r.height/2-archiveNode.clientHeight*.42;
+    archiveSnap=true;
+    archiveNode.scrollTo({top:Math.max(0,target),behavior:reduced?'instant':'smooth'});
+    setTimeout(()=>{archiveSnap=false;archiveHasGesture=false;},500);
+  },180);
+},{passive:true});
 // No artistic zoom bounds: only reject non-finite floating-point results.
 function finiteScale(value,factor){const next=value*factor;return Number.isFinite(next)&&next>0?next:value;}
 function zoomModel(delta){targetModelZoom=finiteScale(targetModelZoom,Math.exp(-delta*.003));dirty=true;}
@@ -4646,7 +4562,12 @@ function moveStructure(delta){
     const direction=Math.sign(structureDelta);structureDelta-=direction*110;
     navigateTo(Math.round(targetTravel)+direction,true);moved=true;
   }
-  if(moved)refreshOrbit();
+  if(moved){
+    clearTimeout(archiveIdle);archiveHasGesture=false;archiveSnap=true;
+    const button=buttons.get(current.id),r=button.getBoundingClientRect(),nav=archiveNode.getBoundingClientRect();
+    archiveNode.scrollTo({top:Math.max(0,archiveNode.scrollTop+r.top-nav.top+r.height/2-archiveNode.clientHeight*.42),behavior:reduced?'instant':'smooth'});
+    setTimeout(()=>archiveSnap=false,500);
+  }
 }
 $('#timeline-bottom-scroll').addEventListener('wheel',e=>{
   e.preventDefault();e.stopPropagation();
@@ -4851,8 +4772,6 @@ function stopEnding(){
   endingGeneration++;
   for(const timer of endingTimers)clearTimeout(timer);endingTimers=[];
   document.body.classList.remove('ending-mode');
-  $('#narrative-title').textContent='거리를 채우던 간판은 왜 정비의 대상이 되었을까?';
-  for(const button of $('#story-stages').children){if(button.dataset.story==='0')button.setAttribute('aria-current','step');else button.removeAttribute('aria-current');}
   $('#ending-scene').hidden=true;$('#ending-scene').dataset.phase='idle';
   $('#ending-intro').removeAttribute('src');$('#ending-intro').hidden=true;
   $('#ending-collage').replaceChildren();$('#ending-message').classList.remove('visible');
@@ -4866,33 +4785,15 @@ function layoutEnding(){
   const cols=innerWidth<700?3:6,rows=Math.ceil(count/cols);
   photos.forEach((img,i)=>{
     const ratio=Number(img.dataset.ratio),cell=Number(img.dataset.cell);
-    let w,h,x,y;
-    if(endingMode==='gathered'){
-      w=Math.min(innerWidth*(innerWidth<700?.19:.115),innerHeight*.16*ratio);h=w/ratio;
-      const angle=-Math.PI/2+i*Math.PI*2/Math.max(1,count);
-      x=innerWidth/2+Math.cos(angle)*innerWidth*.35-w/2;
-      y=innerHeight/2+Math.sin(angle)*innerHeight*.32-h/2;
-    }else{
-      w=Math.min(innerWidth*(innerWidth<700?.5+Number(img.dataset.scale)*.25:.20+Number(img.dataset.scale)*.12),innerHeight*.35*ratio);h=w/ratio;
-      const cx=((cell%cols)+.5+Number(img.dataset.jitterX)*.32)/cols*innerWidth;
-      const cy=(Math.floor(cell/cols)+.5+Number(img.dataset.jitterY)*.32)/rows*innerHeight;
-      x=clamp(cx-w/2,0,Math.max(0,innerWidth-w));y=clamp(cy-h/2,0,Math.max(0,innerHeight-h));
-    }
-    img.style.width=`${w}px`;img.style.height=`${h}px`;img.style.left=`${x}px`;img.style.top=`${y}px`;
+    const targetWidth=innerWidth*(innerWidth<700?.5+Number(img.dataset.scale)*.25:.22+Number(img.dataset.scale)*.13);
+    const w=Math.min(targetWidth,innerHeight*.38*ratio),h=w/ratio;
+    const cx=((cell%cols)+.5+Number(img.dataset.jitterX)*.32)/cols*innerWidth;
+    const cy=(Math.floor(cell/cols)+.5+Number(img.dataset.jitterY)*.32)/rows*innerHeight;
+    img.style.width=`${w}px`;img.style.height=`${h}px`;
+    img.style.left=`${clamp(cx-w/2,0,Math.max(0,innerWidth-w))}px`;
+    img.style.top=`${clamp(cy-h/2,0,Math.max(0,innerHeight-h))}px`;
   });
-  $('#ending-scene').dataset.layout=endingMode;
-  $('#ending-scatter').textContent=endingMode==='gathered'?'흩어 보기':'다시 모으기';
-  $('#ending-message').textContent=endingMode==='gathered'?archive.ending.message:'개선된 간판, 흩어진 정보';
 }
-function makeEndingPhotoDraggable(img){
-  let drag;
-  img.draggable=false;img.tabIndex=0;img.setAttribute('aria-label','드래그하여 간판 사진 이동');
-  img.addEventListener('pointerdown',e=>{if(e.button!==0)return;const r=img.getBoundingClientRect();drag={x:e.clientX,y:e.clientY,left:r.left,top:r.top};img.setPointerCapture(e.pointerId);img.style.zIndex=String(Date.now()%100000);e.stopPropagation();});
-  img.addEventListener('pointermove',e=>{if(!drag)return;img.style.left=`${drag.left+e.clientX-drag.x}px`;img.style.top=`${drag.top+e.clientY-drag.y}px`;e.preventDefault();});
-  img.addEventListener('pointerup',()=>drag=null);img.addEventListener('pointercancel',()=>drag=null);
-  img.addEventListener('keydown',e=>{const delta={ArrowLeft:[-16,0],ArrowRight:[16,0],ArrowUp:[0,-16],ArrowDown:[0,16]}[e.key];if(delta){e.preventDefault();e.stopPropagation();img.style.left=`${parseFloat(img.style.left)+delta[0]}px`;img.style.top=`${parseFloat(img.style.top)+delta[1]}px`;}});
-}
-$('#ending-scatter').addEventListener('click',()=>{endingMode=endingMode==='gathered'?'scattered':'gathered';layoutEnding();});
 function revealEndingPhotos(token){
   const config=archive.ending,container=$('#ending-collage');
   $('#ending-scene').dataset.phase='collage';
@@ -4903,7 +4804,7 @@ function revealEndingPhotos(token){
     img.width=photo.width;img.height=photo.height;img.decoding='async';
     img.dataset.ratio=photo.width/photo.height;img.dataset.cell=cells[i];img.dataset.scale=randomNumber();
     img.dataset.jitterX=randomNumber()*2-1;img.dataset.jitterY=randomNumber()*2-1;
-    img.style.aspectRatio=`${photo.width} / ${photo.height}`;container.append(img);makeEndingPhotoDraggable(img);
+    img.style.aspectRatio=`${photo.width} / ${photo.height}`;container.append(img);
     // Visibility begins only after the actual image decodes, so every photograph
     // emerges from black instead of popping in after an already-finished fade.
     img.decode().then(()=>{
@@ -4911,12 +4812,11 @@ function revealEndingPhotos(token){
     }).catch(error=>console.error('Ending photo failed',photo.src,error));
   });
   layoutEnding();
-  $('#ending-message').textContent=endingMode==='gathered'?config.message:'개선된 간판, 흩어진 정보';
+  $('#ending-message').textContent=config.message;
   endingLater(()=>$('#ending-message').classList.add('visible'),reduced?0:config.photos.length*config.timing.stagger+config.timing.photoFade,token);
 }
 async function startEnding(previous){
   const token=endingGeneration,config=archive.ending;
-  endingMode=requestedEndingMode;requestedEndingMode='gathered';
   endingReturnIndex=previous&&previous.kind!=='ending'?photoIndex.get(previous.id):archive.photos.length-2;
   document.body.classList.add('ending-mode');$('#ending-scene').hidden=false;$('#ending-scene').dataset.phase='black';
   $('#ending-back').focus({preventScroll:true});

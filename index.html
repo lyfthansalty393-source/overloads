@@ -10,21 +10,7 @@
 </head>
 <body>
   <div id="model-layer"><canvas id="scene" aria-label="360도 XYZ 회전 및 확대 가능한 5면 공간 모델"></canvas></div>
-  <header id="narrative-header">
-    <p id="narrative-title">거리를 채우던 간판은 왜 정비의 대상이 되었을까?</p>
-    <nav id="story-stages" aria-label="이야기 단계">
-      <button type="button" data-story="0" aria-label="거리를 채우던 간판은 왜 정비의 대상이 되었을까?" aria-current="step">01</button>
-      <button type="button" data-story="1" aria-label="간판 개선 사업을 했지만, 그 뒤에도 정보의 과부하는 끝나지 않았다">02</button>
-      <button type="button" data-story="2" aria-label="개선된 간판, 흩어진 정보">03</button>
-    </nav>
-  </header>
-  <nav id="archive" aria-label="모델을 둘러싼 연대순 사진 궤도"></nav>
-  <div id="orbit-controls" aria-label="사진 궤도 조작">
-    <button id="orbit-prev" type="button" aria-label="이전 사진">←</button>
-    <button id="orbit-drag" type="button" aria-label="좌우로 드래그하여 사진 궤도 회전">↔</button>
-    <button id="orbit-next" type="button" aria-label="다음 사진">→</button>
-  </div>
-  <button id="history-toggle" type="button" aria-expanded="false" aria-controls="timeline">연표</button>
+  <nav id="archive" aria-label="연대순 사진"></nav>
   <main id="stage" aria-label="공간 사진">
     <div id="picture-frame">
       <img id="fallback" alt="" hidden>
@@ -45,7 +31,6 @@
     <img id="ending-intro" alt="상가 건물의 외벽을 채운 간판들" hidden>
     <div id="ending-collage" aria-label="겹쳐 나타나는 간판 사진들"></div>
     <p id="ending-message"></p>
-    <button id="ending-scatter" type="button">흩어 보기</button>
     <button id="ending-back" type="button">- 돌아가기</button>
   </section>
   <dialog id="enlarged" aria-label="확대한 사진">
