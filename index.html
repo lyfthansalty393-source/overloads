@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#101010">
+  <link rel="icon" href="data:,">
+  <title>한국 간판 100년</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <nav id="archive" aria-label="연대순 사진"></nav>
+  <main id="stage" aria-label="공간 사진">
+    <div id="picture-frame">
+      <img id="fallback" alt="" hidden>
+      <canvas id="scene" aria-label="사진의 공간 투영"></canvas>
+      <svg id="debug-overlay" viewBox="0 0 1000 1000" preserveAspectRatio="none" hidden></svg>
+    </div>
+    <div id="caption" aria-live="polite"><p id="photo-year"></p><p id="photo-description"></p></div>
+  </main>
+  <aside id="timeline" aria-label="시대별 제도"><div id="eras"></div></aside>
+  <dialog id="enlarged" aria-label="확대한 사진">
+    <button id="back" type="button">← 뒤돌아가기</button>
+    <div id="zoom-surface"><img id="zoom-photo" alt=""></div>
+  </dialog>
+  <script id="archive-data" type="application/json">null</script>
+  <script id="projection-data" type="application/json">null</script>
+  <script type="module" src="app.js"></script>
+</body>
+</html>

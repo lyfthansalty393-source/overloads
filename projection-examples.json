@@ -1,0 +1,80 @@
+[
+  {
+    "id": "1960-31-webp",
+    "vanishingPoint": {
+      "x": 0.49,
+      "y": 0.49
+    },
+    "backWall": {
+      "left": 0.37,
+      "top": 0.35,
+      "right": 0.62,
+      "bottom": 0.67
+    },
+    "sky": {
+      "mode": "far-plane"
+    },
+    "ground": {
+      "mode": "photo"
+    },
+    "leftWall": {
+      "enabled": true
+    },
+    "rightWall": {
+      "enabled": true
+    },
+    "depth": 1.0
+  },
+  {
+    "id": "1980-03-jpeg",
+    "vanishingPoint": {
+      "x": 0.77,
+      "y": 0.5
+    },
+    "backWall": {
+      "left": 0.65,
+      "top": 0.35,
+      "right": 0.86,
+      "bottom": 0.68
+    },
+    "sky": {
+      "mode": "gradient"
+    },
+    "ground": {
+      "mode": "photo"
+    },
+    "leftWall": {
+      "enabled": true
+    },
+    "rightWall": {
+      "enabled": false
+    },
+    "depth": 1.0
+  },
+  {
+    "id": "1960-11-webp",
+    "vanishingPoint": {
+      "x": 0.51,
+      "y": 0.56
+    },
+    "backWall": {
+      "left": 0.36,
+      "top": 0.43,
+      "right": 0.66,
+      "bottom": 0.72
+    },
+    "sky": {
+      "mode": "far-plane"
+    },
+    "ground": {
+      "mode": "photo"
+    },
+    "leftWall": {
+      "enabled": true
+    },
+    "rightWall": {
+      "enabled": true
+    },
+    "depth": 1.0
+  }
+]
