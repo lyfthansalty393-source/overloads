@@ -4424,9 +4424,11 @@ function resize() {
   const zoneLeft=Math.min(panelLeft,frame.getBoundingClientRect().right+12);
   $('#timeline-scroll-zone').style.left=`${zoneLeft}px`;
   $('#timeline-scroll-zone').style.width=`${Math.max(0,panelLeft-zoneLeft)}px`;
+  centerActiveEra('instant');
   dirty=true;
 }
 addEventListener('resize',resize);
+document.fonts.ready.then(()=>centerActiveEra('instant'));
 
 async function selectPhoto(photo) {
   if(current?.id===photo.id)return;
@@ -4463,6 +4465,18 @@ async function selectPhoto(photo) {
     fallback.src=photo.src;fallback.alt=photo.description;fallback.hidden=false;canvas.hidden=true;
   }
 }
+function centerActiveEra(behavior='instant'){
+  const view=$('#era-scroll'),list=$('#eras'),active=list.querySelector('.era-event.active');
+  if(!active)return;
+  const contentHeight=el=>el.offsetHeight-parseFloat(getComputedStyle(el).paddingBottom);
+  const first=list.firstElementChild,last=list.lastElementChild,style=getComputedStyle(view);
+  // Supply real end spacers so even the first/last period can be centered.
+  list.style.paddingTop=`${Math.max(0,view.clientHeight/2-contentHeight(first)/2-parseFloat(style.paddingTop))}px`;
+  list.style.paddingBottom=`${Math.max(0,view.clientHeight/2-contentHeight(last)/2-parseFloat(style.paddingBottom))}px`;
+  const visibleCenter=view.getBoundingClientRect().top+view.clientTop+view.clientHeight/2;
+  const contentCenter=active.getBoundingClientRect().top+contentHeight(active)/2;
+  view.scrollTo({top:Math.max(0,view.scrollTop+contentCenter-visibleCenter),behavior});
+}
 function updateTimeline(year) {
   let active;
   for(const el of $('#eras').children) {
@@ -4479,7 +4493,7 @@ function updateTimeline(year) {
     swatch.title=`${color.label} ${color.hex}`;swatch.setAttribute('aria-label',swatch.title);
     $('#specimen-colors').append(swatch);
   }
-  if(active){const view=$('#era-scroll');view.scrollTo({top:Math.max(0,active.offsetTop-view.clientHeight*.42),behavior:reduced?'instant':'smooth'});}
+  requestAnimationFrame(()=>centerActiveEra(reduced?'instant':'smooth'));
 }
 
 for(const era of archive.eras) {
