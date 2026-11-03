@@ -3767,13 +3767,37 @@ function rotateModel(x,y,z){
   for(const [axis,angle] of [['x',x],['y',y],['z',z]])if(angle){q.setFromAxisAngle(axes[axis],angle);targetModelRotation.premultiply(q);}
   targetModelRotation.normalize();rotationX+=x;rotationY+=y;rotationZ+=z;dirty=true;
 }
+// Object-centered virtual trackball: drag endpoints define one quaternion.
+// Sensitivity follows the visible model size instead of fixed radians per pixel.
+function dragSurface(){
+  const r=frame.getBoundingClientRect();
+  return {cx:r.left+r.width/2,cy:r.top+r.height/2,
+    radius:Math.max(100,Math.min(Math.min(innerWidth,innerHeight)*.48,r.height*.48*modelZoom))};
+}
+function trackballPoint(x,y,surface){
+  const px=(x-surface.cx)/surface.radius,py=(surface.cy-y)/surface.radius;
+  const d=px*px+py*py;
+  const z=d<=.5?Math.sqrt(1-d):.5/Math.sqrt(d);
+  return new THREE.Vector3(px,py,z).normalize();
+}
+function beginModelDrag(x,y,roll=false){
+  targetModelRotation.copy(modelRig.quaternion);
+  const surface=dragSurface();
+  activeModelDrag={x,y,lastX:x,lastY:y,roll,distance:0,surface,
+    startVector:trackballPoint(x,y,surface),startRotation:modelRig.quaternion.clone()};
+}
 modelLayer.addEventListener('contextmenu',e=>e.preventDefault());
 modelLayer.addEventListener('pointerdown',e=>{
   if(debug||![0,2].includes(e.button))return;
-  modelLayer.setPointerCapture(e.pointerId);modelDragged=false;
+  modelLayer.setPointerCapture(e.pointerId);
+  if(!modelPointers.size)modelDragged=false;
   modelPointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
-  activeModelDrag={x:e.clientX,y:e.clientY,roll:e.button===2||e.shiftKey,distance:0};
-  if(modelPointers.size===2){const [a,b]=[...modelPointers.values()];modelPinch={distance:Math.hypot(a.x-b.x,a.y-b.y),angle:Math.atan2(b.y-a.y,b.x-a.x),zoom:targetModelZoom};}
+  beginModelDrag(e.clientX,e.clientY,e.button===2||e.shiftKey);
+  if(modelPointers.size===2){
+    const [a,b]=[...modelPointers.values()];
+    targetModelZoom=modelZoom;
+    modelPinch={distance:Math.hypot(a.x-b.x,a.y-b.y),angle:Math.atan2(b.y-a.y,b.x-a.x),zoom:modelZoom};
+  }
   modelLayer.classList.add('rotating');
 });
 modelLayer.addEventListener('pointermove',e=>{
@@ -3783,17 +3807,32 @@ modelLayer.addEventListener('pointermove',e=>{
     const [a,b]=[...modelPointers.values()];
     targetModelZoom=finiteScale(modelPinch.zoom,Math.hypot(a.x-b.x,a.y-b.y)/Math.max(.001,modelPinch.distance));
     const angle=Math.atan2(b.y-a.y,b.x-a.x);let twist=angle-modelPinch.angle;
-    twist=Math.atan2(Math.sin(twist),Math.cos(twist));rotateModel(0,0,twist);modelPinch.angle=angle;modelDragged=true;
+    twist=Math.atan2(Math.sin(twist),Math.cos(twist));rotateModel(0,0,-twist);modelPinch.angle=angle;modelDragged=true;
   }else if(activeModelDrag){
-    const dx=e.clientX-activeModelDrag.x,dy=e.clientY-activeModelDrag.y;
-    activeModelDrag.distance+=Math.hypot(dx,dy);if(activeModelDrag.distance>3)modelDragged=true;
-    if(activeModelDrag.roll||e.shiftKey)rotateModel(0,0,(dx-dy)*.008);
-    else rotateModel(dy*.008,dx*.008,0);
-    activeModelDrag.x=e.clientX;activeModelDrag.y=e.clientY;
+    const d=activeModelDrag;
+    const roll=!!(e.buttons&2)||e.shiftKey;
+    if(roll!==d.roll){modelRig.quaternion.copy(targetModelRotation);beginModelDrag(e.clientX,e.clientY,roll);return;}
+    const dx=e.clientX-d.lastX,dy=e.clientY-d.lastY;
+    d.distance+=Math.hypot(dx,dy);if(d.distance>3)modelDragged=true;
+    const delta=new THREE.Quaternion();
+    if(d.roll){
+      delta.setFromAxisAngle(axes.z,-(e.clientX-d.x)/d.surface.radius);
+      rotationZ-=dx/d.surface.radius;
+    }else{
+      delta.setFromUnitVectors(d.startVector,trackballPoint(e.clientX,e.clientY,d.surface));
+      rotationX+=dy/d.surface.radius;rotationY+=dx/d.surface.radius;
+    }
+    targetModelRotation.copy(delta).multiply(d.startRotation).normalize();
+    d.lastX=e.clientX;d.lastY=e.clientY;
   }
   dirty=true;
 });
-function releaseModel(e){modelPointers.delete(e.pointerId);modelPinch=null;activeModelDrag=null;modelLayer.classList.remove('rotating');}
+function releaseModel(e){
+  modelPointers.delete(e.pointerId);modelPinch=null;activeModelDrag=null;
+  modelRig.quaternion.copy(targetModelRotation);dirty=true;
+  if(modelPointers.size===1){const p=[...modelPointers.values()][0];beginModelDrag(p.x,p.y);}
+  else modelLayer.classList.remove('rotating');
+}
 modelLayer.addEventListener('pointerup',releaseModel);modelLayer.addEventListener('pointercancel',releaseModel);
 addEventListener('keydown',e=>{
   if(dialog.open||debug||e.target.closest('select, input, textarea'))return;
@@ -3837,7 +3876,8 @@ function render(time=0) {
   const damping=1-Math.exp(-dt*6);
   entrance+=(1-entrance)*(reduced?1:damping);
   const orbitMoving=modelRig.quaternion.angleTo(targetModelRotation)>.00001||Math.abs(Math.log(targetModelZoom)-Math.log(modelZoom))>.00001;
-  modelRig.quaternion.slerp(targetModelRotation,damping);
+  if(modelPointers.size)modelRig.quaternion.copy(targetModelRotation);
+  else modelRig.quaternion.slerp(targetModelRotation,damping);
   modelZoom=Math.exp(Math.log(modelZoom)+(Math.log(targetModelZoom)-Math.log(modelZoom))*damping);
   if(!renderer || !currentTexture || !current || loadingPhoto)return;
   if(!dirty && Math.abs(displacement)<.0001 && entrance>.9999 && !orbitMoving)return;
@@ -3848,8 +3888,8 @@ function render(time=0) {
   if(current.spatial&&derived&&currentConfig){
     yaw=debug?0:rotationY;pitch=debug?0:rotationX;
     camera.fov=50;
-    // Stand outside the open front so all five surfaces are legible. Wheel zoom
-    // crosses the opening into the room; drag orbits the VP wall within limits.
+    // Keep the open cube centered; trackball rotates the rig and optical zoom
+    // preserves unrestricted enlargement without crossing its surfaces.
     const center=new THREE.Vector3(derived.cx,derived.cy,-derived.f-derived.side*.5);
     const distance=derived.side*(1.8+(reduced?0:(1-entrance)*.35));
     camera.position.set(center.x,center.y,center.z+distance);
