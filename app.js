@@ -25,6 +25,7 @@ let entrance=0, lastFrame=0;
 const photoIndex=new Map(archive.photos.map((p,i)=>[p.id,i]));
 const frame = $('#picture-frame');
 const canvas = $('#scene');
+const modelLayer = $('#model-layer');
 const fallback = $('#fallback');
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(50, 1, .01, 1000);
@@ -40,8 +41,11 @@ try {
 }
 const room = new THREE.Group();
 const outlineGroup = new THREE.Group();
-scene.add(room,outlineGroup);
-let orbitYaw=.18, orbitPitch=.10, targetOrbitYaw=.18, targetOrbitPitch=.10;
+const modelRig=new THREE.Group();
+modelRig.add(room,outlineGroup);scene.add(modelRig);
+const targetModelRotation=new THREE.Quaternion();
+let rotationX=.1,rotationY=.18,rotationZ=0;
+
 let modelZoom=1, targetModelZoom=1, modelDragged=false, activeModelDrag;
 const modelPointers=new Map();let modelPinch;
 const loader = new THREE.TextureLoader();
@@ -174,13 +178,15 @@ function rebuild() {
   }
   while(outlineGroup.children.length){const line=outlineGroup.children[0];outlineGroup.remove(line);line.geometry.dispose();line.material.dispose();}
   if(!current.spatial){
-    derived=null;
+    derived=null;modelRig.position.set(0,0,0);room.position.set(0,0,0);outlineGroup.position.set(0,0,0);
     const geometry=new THREE.PlaneGeometry(current.width/current.height,1);
     const material=new THREE.MeshBasicMaterial({map:currentTexture,side:THREE.DoubleSide});
     const mesh=new THREE.Mesh(geometry,material);mesh.name='sign';room.add(mesh);
     resize();drawDebug();dirty=true;return;
   }
   derived=deriveRoom(currentConfig,current.width/current.height);
+  const pivot=new THREE.Vector3(derived.cx,derived.cy,-derived.f-derived.side*.5);
+  modelRig.position.copy(pivot);room.position.copy(pivot).negate();outlineGroup.position.copy(pivot).negate();
   const skyColors=sampleSky(currentTexture);
   const {width:pw,height:ph}=current;
   const outlineEdges=new Map();
@@ -239,7 +245,7 @@ function resize() {
   const availableWidth=stage.clientWidth*(innerWidth<=700?.94:.72);
   const width=Math.min(availableWidth,innerHeight*.66*aspect);
   frame.style.width=`${width}px`;frame.style.height=`${width/aspect}px`;
-  if(renderer) {renderer.setSize(width,width/aspect,false);camera.aspect=aspect;}
+  if(renderer) {renderer.setSize(innerWidth,innerHeight,false);camera.aspect=innerWidth/innerHeight;}
   dirty=true;
 }
 addEventListener('resize',resize);
@@ -248,7 +254,8 @@ async function selectPhoto(photo) {
   if(current?.id===photo.id)return;
   const request=++generation;loadingPhoto=true;
   current=photo;currentConfig=photo.spatial?structuredClone(configMap.get(photo.id)):null;entrance=0;
-  targetOrbitYaw=.18;targetOrbitPitch=.10;targetModelZoom=1;
+  rotationX=photo.spatial?.10:0;rotationY=photo.spatial?.18:0;rotationZ=0;targetModelZoom=1;
+  targetModelRotation.setFromEuler(new THREE.Euler(rotationX,rotationY,rotationZ,'XYZ'));
   archiveNode.querySelectorAll('.scroll-selected').forEach(el=>el.classList.remove('scroll-selected'));
   buttons.get(photo.id)?.classList.add('scroll-selected');
   $('#photo-year').textContent=`${photo.year}s`;
@@ -334,42 +341,51 @@ archiveNode.addEventListener('scroll',()=>{
     setTimeout(()=>{archiveSnap=false;archiveHasGesture=false;},500);
   },180);
 },{passive:true});
-function zoomModel(delta){
-  targetModelZoom=clamp(targetModelZoom*Math.exp(-delta*.0015),.55,4.8);
-  dirty=true;
-}
-$('#stage').addEventListener('wheel',e=>{
+// No artistic zoom bounds: only reject non-finite floating-point results.
+function finiteScale(value,factor){const next=value*factor;return Number.isFinite(next)&&next>0?next:value;}
+function zoomModel(delta){targetModelZoom=finiteScale(targetModelZoom,Math.exp(-delta*.003));dirty=true;}
+modelLayer.addEventListener('wheel',e=>{
   e.preventDefault();e.stopPropagation();
   if(debug||dialog.open)return;
   const unit=e.deltaMode===1?16:e.deltaMode===2?innerHeight:1;
   zoomModel(e.deltaY*unit);
 },{passive:false});
-// Right-hand text has its own native scrolling; it never changes photos or zoom.
 $('#timeline').addEventListener('wheel',e=>e.stopPropagation(),{passive:true});
-frame.addEventListener('pointerdown',e=>{
-  if(debug||e.button!==0)return;
-  frame.setPointerCapture(e.pointerId);modelDragged=false;
+const axes={x:new THREE.Vector3(1,0,0),y:new THREE.Vector3(0,1,0),z:new THREE.Vector3(0,0,1)};
+function rotateModel(x,y,z){
+  // Quaternion increments avoid pole limits and Euler gimbal lock.
+  const q=new THREE.Quaternion();
+  for(const [axis,angle] of [['x',x],['y',y],['z',z]])if(angle){q.setFromAxisAngle(axes[axis],angle);targetModelRotation.premultiply(q);}
+  targetModelRotation.normalize();rotationX+=x;rotationY+=y;rotationZ+=z;dirty=true;
+}
+modelLayer.addEventListener('contextmenu',e=>e.preventDefault());
+modelLayer.addEventListener('pointerdown',e=>{
+  if(debug||![0,2].includes(e.button))return;
+  modelLayer.setPointerCapture(e.pointerId);modelDragged=false;
   modelPointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
-  activeModelDrag={x:e.clientX,y:e.clientY,yaw:targetOrbitYaw,pitch:targetOrbitPitch};
-  if(modelPointers.size===2){const [a,b]=[...modelPointers.values()];modelPinch={distance:Math.hypot(a.x-b.x,a.y-b.y),zoom:targetModelZoom};}
-  frame.classList.add('rotating');
+  activeModelDrag={x:e.clientX,y:e.clientY,roll:e.button===2||e.shiftKey,distance:0};
+  if(modelPointers.size===2){const [a,b]=[...modelPointers.values()];modelPinch={distance:Math.hypot(a.x-b.x,a.y-b.y),angle:Math.atan2(b.y-a.y,b.x-a.x),zoom:targetModelZoom};}
+  modelLayer.classList.add('rotating');
 });
-frame.addEventListener('pointermove',e=>{
+modelLayer.addEventListener('pointermove',e=>{
   if(debug||!modelPointers.has(e.pointerId))return;
   modelPointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
   if(modelPointers.size===2&&modelPinch){
     const [a,b]=[...modelPointers.values()];
-    targetModelZoom=clamp(modelPinch.zoom*Math.hypot(a.x-b.x,a.y-b.y)/Math.max(1,modelPinch.distance),.55,4.8);modelDragged=true;
+    targetModelZoom=finiteScale(modelPinch.zoom,Math.hypot(a.x-b.x,a.y-b.y)/Math.max(.001,modelPinch.distance));
+    const angle=Math.atan2(b.y-a.y,b.x-a.x);let twist=angle-modelPinch.angle;
+    twist=Math.atan2(Math.sin(twist),Math.cos(twist));rotateModel(0,0,twist);modelPinch.angle=angle;modelDragged=true;
   }else if(activeModelDrag){
     const dx=e.clientX-activeModelDrag.x,dy=e.clientY-activeModelDrag.y;
-    if(Math.hypot(dx,dy)>4)modelDragged=true;
-    targetOrbitYaw=clamp(activeModelDrag.yaw-dx*.003,-Math.PI/9,Math.PI/9);
-    targetOrbitPitch=clamp(activeModelDrag.pitch+dy*.002,-Math.PI/18,Math.PI/18);
+    activeModelDrag.distance+=Math.hypot(dx,dy);if(activeModelDrag.distance>3)modelDragged=true;
+    if(activeModelDrag.roll||e.shiftKey)rotateModel(0,0,(dx-dy)*.008);
+    else rotateModel(dy*.008,dx*.008,0);
+    activeModelDrag.x=e.clientX;activeModelDrag.y=e.clientY;
   }
   dirty=true;
 });
-function releaseModel(e){modelPointers.delete(e.pointerId);modelPinch=null;activeModelDrag=null;frame.classList.remove('rotating');}
-frame.addEventListener('pointerup',releaseModel);frame.addEventListener('pointercancel',releaseModel);
+function releaseModel(e){modelPointers.delete(e.pointerId);modelPinch=null;activeModelDrag=null;modelLayer.classList.remove('rotating');}
+modelLayer.addEventListener('pointerup',releaseModel);modelLayer.addEventListener('pointercancel',releaseModel);
 addEventListener('keydown',e=>{
   if(dialog.open||debug||e.target.closest('select, input, textarea'))return;
   if(['ArrowDown','PageDown','ArrowRight','ArrowUp','PageUp','ArrowLeft','Home','End'].includes(e.key)){
@@ -388,16 +404,16 @@ function openPhoto(photo){lastFocus=document.activeElement;zoomImage.src=photo.s
 function closePhoto(){dialog.close();}
 $('#back').addEventListener('click',closePhoto);
 dialog.addEventListener('close',()=>{document.body.classList.remove('modal-open');pointers.clear();pinch=null;lastFocus?.focus({preventScroll:true});onScroll();});
-surface.addEventListener('wheel',e=>{e.preventDefault();const before=zoom;zoom=clamp(zoom*Math.exp(-e.deltaY*.002),1,8);const x=e.clientX-innerWidth/2,y=e.clientY-innerHeight/2;panX=x-(x-panX)*zoom/before;panY=y-(y-panY)*zoom/before;if(zoom===1)panX=panY=0;paintZoom();},{passive:false});
+surface.addEventListener('wheel',e=>{e.preventDefault();const before=zoom;zoom=finiteScale(zoom,Math.exp(-e.deltaY*.003));const x=e.clientX-innerWidth/2,y=e.clientY-innerHeight/2;panX=x-(x-panX)*zoom/before;panY=y-(y-panY)*zoom/before;if(zoom===1)panX=panY=0;paintZoom();},{passive:false});
 surface.addEventListener('pointerdown',e=>{surface.setPointerCapture(e.pointerId);pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});dragged=false;surface.classList.add('dragging');if(pointers.size===2){const [a,b]=[...pointers.values()];pinch={distance:Math.hypot(a.x-b.x,a.y-b.y),zoom};}});
-surface.addEventListener('pointermove',e=>{const old=pointers.get(e.pointerId);if(!old)return;const dx=e.clientX-old.x,dy=e.clientY-old.y;pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});if(Math.abs(dx)+Math.abs(dy)>2)dragged=true;if(pointers.size===2&&pinch){const [a,b]=[...pointers.values()];zoom=clamp(pinch.zoom*Math.hypot(a.x-b.x,a.y-b.y)/pinch.distance,1,8);}else if(zoom>1){panX+=dx;panY+=dy;}paintZoom();});
+surface.addEventListener('pointermove',e=>{const old=pointers.get(e.pointerId);if(!old)return;const dx=e.clientX-old.x,dy=e.clientY-old.y;pointers.set(e.pointerId,{x:e.clientX,y:e.clientY});if(Math.abs(dx)+Math.abs(dy)>2)dragged=true;if(pointers.size===2&&pinch){const [a,b]=[...pointers.values()];zoom=finiteScale(pinch.zoom,Math.hypot(a.x-b.x,a.y-b.y)/Math.max(.001,pinch.distance));}else if(zoom>1){panX+=dx;panY+=dy;}paintZoom();});
 function release(e){pointers.delete(e.pointerId);pinch=null;surface.classList.remove('dragging');}
 surface.addEventListener('pointerup',release);surface.addEventListener('pointercancel',release);
 surface.addEventListener('click',()=>{if(dragged)return;zoom=zoom===1?2:1;panX=panY=0;paintZoom();});
-frame.addEventListener('click',()=>{if(!debug&&current&&!current.spatial&&!modelDragged)openPhoto(current);});
-frame.addEventListener('dblclick',()=>{if(!debug&&current&&!modelDragged)openPhoto(current);});
-frame.tabIndex=0;frame.setAttribute('role','group');frame.setAttribute('aria-label','5면 공간 모델: 드래그 회전, 휠 확대·축소, Enter 원본 확대');
-frame.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();if(current)openPhoto(current);}});
+modelLayer.addEventListener('click',()=>{if(!debug&&current&&!current.spatial&&!modelDragged)openPhoto(current);});
+modelLayer.addEventListener('dblclick',()=>{if(!debug&&current&&!modelDragged)openPhoto(current);});
+modelLayer.tabIndex=0;modelLayer.setAttribute('role','group');modelLayer.setAttribute('aria-label','5면 공간 모델: 드래그 XY 회전, Shift 또는 오른쪽 드래그 Z 회전, 휠 확대·축소, Enter 원본 확대');
+modelLayer.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();if(current)openPhoto(current);}});
 
 function render(time=0) {
   if(disposed)return;
@@ -411,23 +427,23 @@ function render(time=0) {
   if(Math.abs(targetTravel-travel)<.6 && current?.id!==archive.photos[index].id)selectPhoto(archive.photos[index]);
   const damping=1-Math.exp(-dt*6);
   entrance+=(1-entrance)*(reduced?1:damping);
-  const orbitMoving=Math.abs(targetOrbitYaw-orbitYaw)+Math.abs(targetOrbitPitch-orbitPitch)+Math.abs(targetModelZoom-modelZoom)>.00001;
-  orbitYaw+=(targetOrbitYaw-orbitYaw)*damping;orbitPitch+=(targetOrbitPitch-orbitPitch)*damping;
-  modelZoom+=(targetModelZoom-modelZoom)*damping;
+  const orbitMoving=modelRig.quaternion.angleTo(targetModelRotation)>.00001||Math.abs(Math.log(targetModelZoom)-Math.log(modelZoom))>.00001;
+  modelRig.quaternion.slerp(targetModelRotation,damping);
+  modelZoom=Math.exp(Math.log(modelZoom)+(Math.log(targetModelZoom)-Math.log(modelZoom))*damping);
   if(!renderer || !currentTexture || !current || loadingPhoto)return;
   if(!dirty && Math.abs(displacement)<.0001 && entrance>.9999 && !orbitMoving)return;
   dirty=false;
-  camera.aspect=current.width/current.height;
+  camera.aspect=innerWidth/innerHeight;
+  camera.zoom=frame.clientHeight/innerHeight*modelZoom;
   let yaw=0,pitch=0;
   if(current.spatial&&derived&&currentConfig){
-    yaw=debug?0:orbitYaw;pitch=debug?0:orbitPitch;
+    yaw=debug?0:rotationY;pitch=debug?0:rotationX;
     camera.fov=50;
     // Stand outside the open front so all five surfaces are legible. Wheel zoom
     // crosses the opening into the room; drag orbits the VP wall within limits.
     const center=new THREE.Vector3(derived.cx,derived.cy,-derived.f-derived.side*.5);
-    const distance=derived.side*(1.8/modelZoom+(reduced?0:(1-entrance)*.35));
-    camera.position.set(center.x+Math.sin(yaw)*Math.cos(pitch)*distance,
-      center.y+Math.sin(pitch)*distance,center.z+Math.cos(yaw)*Math.cos(pitch)*distance);
+    const distance=derived.side*(1.8+(reduced?0:(1-entrance)*.35));
+    camera.position.set(center.x,center.y,center.z+distance);
     camera.lookAt(center);
     camera.near=derived.side*.005;camera.far=derived.f+derived.side*12;
     camera.updateProjectionMatrix();
@@ -436,14 +452,19 @@ function render(time=0) {
     for(const mesh of room.children)mesh.material.uniforms.darkening.value=0;
   }else{
     const photoDistance=1 / (2 * Math.tan(THREE.MathUtils.degToRad(25)));
-    camera.fov=50;camera.position.set(0,0,photoDistance/modelZoom);
+    camera.fov=50;camera.position.set(0,0,photoDistance);
     camera.rotation.set(0,0,0);camera.near=.01;camera.far=100;camera.updateProjectionMatrix();
   }
+  const screenFrame=frame.getBoundingClientRect();
+  camera.projectionMatrix.elements[8]=1-2*(screenFrame.left+screenFrame.width/2)/innerWidth;
+  camera.projectionMatrix.elements[9]=2*(screenFrame.top+screenFrame.height/2)/innerHeight-1;
+  camera.projectionMatrixInverse.copy(camera.projectionMatrix).invert();
   renderer.render(scene,camera);
   window.__signArchive={id:current.id,faces:room.children.map(m=>m.name),depth:derived?.depth??0,
     cubeSide:derived?.side??0,cameraZ:camera.position.z,entrance,travel,targetTravel,modelZoom,outlineCount:outlineGroup.children.length,
     yawDegrees:THREE.MathUtils.radToDeg(yaw),pitchDegrees:THREE.MathUtils.radToDeg(pitch),
-    textureCount:renderer.info.memory.textures,spatialCount:spatial.length};
+    rollDegrees:THREE.MathUtils.radToDeg(rotationZ),quaternion:modelRig.quaternion.toArray(),
+    viewport:[renderer.domElement.width,renderer.domElement.height],textureCount:renderer.info.memory.textures,spatialCount:spatial.length};
 }
 
 function drawDebug() {

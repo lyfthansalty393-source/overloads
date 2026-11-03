@@ -9,11 +9,11 @@
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
+  <div id="model-layer"><canvas id="scene" aria-label="360도 XYZ 회전 및 확대 가능한 5면 공간 모델"></canvas></div>
   <nav id="archive" aria-label="연대순 사진"></nav>
   <main id="stage" aria-label="공간 사진">
     <div id="picture-frame">
       <img id="fallback" alt="" hidden>
-      <canvas id="scene" aria-label="사진의 공간 투영"></canvas>
       <svg id="debug-overlay" viewBox="0 0 1000 1000" preserveAspectRatio="none" hidden></svg>
     </div>
     <div id="caption" aria-live="polite"><p id="photo-year"></p><p id="photo-description"></p></div>
