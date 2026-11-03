@@ -1856,16 +1856,16 @@
     },
     {
       "id": "2020-ending",
-      "src": "assets/ending/qqq-01.webp",
-      "filename": "2020-ending",
+      "src": "assets/ending/2020-intro.webp",
+      "filename": "2020-13.png",
       "year": 2020,
       "era": 2020,
-      "width": 6000,
-      "height": 4000,
+      "width": 8940,
+      "height": 3640,
       "spatial": false,
       "kind": "ending",
       "description": "간판 개선 사업을 했지만, 그 뒤에도 정보의 과부하는 끝나지 않았다.",
-      "descriptionBasis": "사용자 요청 엔딩 메시지와 첨부 압축 사진"
+      "descriptionBasis": "추가 첨부한 파노라마 원본과 사용자 요청 엔딩 메시지"
     }
   ],
   "captionResearch": {
@@ -1877,9 +1877,13 @@
     "note": "두 원문은 네트워크 정책 403으로 아직 읽지 못함. 개별 설명은 첨부 사진을 직접 관찰해 작성했으며 기사 캡션으로 검증된 내용이 아님."
   },
   "ending": {
-    "intro": null,
-    "introPending": true,
-    "introNote": "본문에 표시된 파노라마의 원본 파일 별도 첨부 필요. 임의 사진으로 대체하지 않음.",
+    "intro": {
+      "src": "assets/ending/2020-intro.webp",
+      "originalSrc": "assets/photos/2020-13.png",
+      "width": 8940,
+      "height": 3640
+    },
+    "introPending": false,
     "photos": [
       {
         "src": "assets/ending/qqq-01.webp",

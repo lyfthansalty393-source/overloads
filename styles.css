@@ -123,3 +123,23 @@ body.ending-mode #model-layer,body.ending-mode #stage,body.ending-mode #archive,
 @media(prefers-reduced-motion:reduce){#ending-scene *{transition:none!important}}
 #ending-scene::after{content:"";position:absolute;inset:72% 0 0;z-index:1;pointer-events:none;background:linear-gradient(transparent,rgb(16 16 16 / .8));opacity:0;transition:opacity 1s ease}
 #ending-scene[data-phase="collage"]::after{opacity:1}
+
+/* Current draft: larger reading type and an unfilled photo caption. */
+.era-event .era-number,.era-event .era-suffix,.era-event p{font-size:20px}
+.era-event.active .era-number,.era-event.active .era-suffix,.era-event.active p{font-size:24px}
+#photo-year{font-size:24px;font-weight:500}
+#photo-description{font-size:24px;line-height:1.65}
+#archive .era-group .era-label{font-size:20px}
+#archive .era-group.active-era .era-label{font-size:24px}
+#specimen-material{font-size:18px}#specimen-type{font-size:16px}
+#ending-message{font-size:24px}
+#back,#ending-back{font-size:20px}
+#caption{background:transparent;border-left:1px solid rgb(86 14 69 / .45);min-height:0;padding:10px 14px;box-shadow:none}
+#caption p{margin-bottom:8px}#caption p:last-child{margin-bottom:0}
+.era-event p,#caption p,#specimen-info p{overflow-wrap:anywhere}
+@media(max-width:700px){
+ :root{--timeline-width:36vw}
+ #caption{max-height:34dvh;overflow-y:auto;padding:8px 10px}
+ #specimen-material{font-size:16px}#specimen-type{font-size:14px}
+ #era-specimen{padding:10px 8px;gap:5px;min-height:180px}
+}
