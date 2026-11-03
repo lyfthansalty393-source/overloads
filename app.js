@@ -23,6 +23,8 @@ let dirty = true, disposed = false;
 let travel=0, targetTravel=0, travelVelocity=0;
 let entrance=0, lastFrame=0;
 const photoIndex=new Map(archive.photos.map((p,i)=>[p.id,i]));
+let orbitAngle=0,orbitDidDrag=false,orbitDragState=null;
+let requestedEndingMode='gathered',endingMode='gathered';
 const frame = $('#picture-frame');
 const canvas = $('#scene');
 const modelLayer = $('#model-layer');
@@ -242,11 +244,12 @@ function rebuild() {
 function resize() {
   if(!current)return;
   const stage=$('#stage'), aspect=current.width/current.height;
-  const availableWidth=stage.clientWidth*(innerWidth<=700?.94:.72);
-  const width=Math.min(availableWidth,innerHeight*.66*aspect);
+  const availableWidth=stage.clientWidth*(innerWidth<=900?.72:.55);
+  const width=Math.min(availableWidth,innerHeight*.5*aspect);
   frame.style.width=`${width}px`;frame.style.height=`${width/aspect}px`;
   if(renderer) {renderer.setSize(innerWidth,innerHeight,false);camera.aspect=innerWidth/innerHeight;}
-  const panelLeft=$('#timeline').getBoundingClientRect().left;
+  refreshOrbit();
+  const panelLeft=innerWidth<=900?innerWidth:$('#timeline').getBoundingClientRect().left;
   const zoneLeft=Math.min(panelLeft,frame.getBoundingClientRect().right+12);
   $('#timeline-scroll-zone').style.left=`${zoneLeft}px`;
   $('#timeline-scroll-zone').style.width=`${Math.max(0,panelLeft-zoneLeft)}px`;
@@ -319,7 +322,8 @@ for(const era of archive.eras) {
     // A single uniform scale per thumbnail; portrait and landscape ratios stay original.
     const scale=Math.min(1,180/Math.max(photo.width,photo.height));
     img.style.width=`${photo.width*scale}px`;
-    button.append(img);button.addEventListener('click',()=>{clearTimeout(archiveIdle);archiveHasGesture=false;archiveSnap=false;navigateTo(photoIndex.get(photo.id));});
+    button.append(img);button.addEventListener('click',e=>{if(e.detail&&orbitDidDrag)return;navigateTo(photoIndex.get(photo.id));});
+    button.dataset.year=`${photo.year}s`;
     buttons.set(photo.id,button);section.append(button);
   }
   $('#archive').append(section);
@@ -333,38 +337,72 @@ for(const era of archive.eras) {
   item.append(heading,material,policy);$('#eras').append(item);
 }
 
-// Two independent input regions: archive scroll selects, model wheel zooms.
-let archiveIdle, archiveSnap=false, archiveHasGesture=false;
-function navigateTo(index, immediate=false) {
+// The archive is a rotating ring, not a scroll column. All photos remain
+// selectable via drag, arrows, keyboard, and the clickable era headings.
+function navigateTo(index,immediate=false){
   targetTravel=clamp(index,0,archive.photos.length-1);
   if(immediate||reduced){travel=targetTravel;travelVelocity=0;}
-  selectPhoto(archive.photos[Math.round(targetTravel)]);
-  dirty=true;
+  selectPhoto(archive.photos[Math.round(targetTravel)]);dirty=true;
 }
 function onScroll(){dirty=true;}
-function nearestArchivePhoto(){
-  const marker=archiveNode.getBoundingClientRect().top+archiveNode.clientHeight*.42;
-  let best=archive.photos[0],distance=Infinity;
-  for(const photo of archive.photos){const r=buttons.get(photo.id).getBoundingClientRect();const d=Math.abs((r.top+r.bottom)/2-marker);if(d<distance){distance=d;best=photo;}}
-  return best;
+function refreshOrbit(){
+  if(!current)return;
+  const mobile=innerWidth<=900,slots=mobile?8:14;
+  const index=photoIndex.get(current.id),count=Math.min(slots,archive.photos.length);
+  const start=clamp(index-Math.floor(count/2),0,archive.photos.length-count);
+  const region=archiveNode.getBoundingClientRect(),image=frame.getBoundingClientRect();
+  const cx=image.left+image.width/2-region.left,cy=image.top+image.height/2-region.top;
+  const rx=Math.max(100,region.width*(mobile?.405:.415));
+  const ry=Math.max(100,Math.min(innerHeight*(mobile?.24:.33),image.top+image.height/2-(mobile?150:140),innerHeight-150-(image.top+image.height/2)));
+  for(const button of buttons.values())button.hidden=true;
+  for(let i=0;i<count;i++){
+    const photo=archive.photos[start+i],button=buttons.get(photo.id),relative=start+i-index;
+    const angle=-Math.PI/2+relative*Math.PI*2/count+orbitAngle;
+    const scale=Math.min((mobile?70:112)/photo.width,(mobile?56:86)/photo.height);
+    button.hidden=false;button.style.width=`${photo.width*scale}px`;button.style.height=`${photo.height*scale}px`;
+    button.style.left=`${cx+Math.cos(angle)*rx}px`;button.style.top=`${cy+Math.sin(angle)*ry}px`;
+    button.style.setProperty('--tilt',`${angle*180/Math.PI+90}deg`);
+  }
 }
-archiveNode.addEventListener('wheel',()=>{archiveHasGesture=true;archiveSnap=false;},{passive:true});
-archiveNode.addEventListener('touchstart',()=>{archiveHasGesture=true;archiveSnap=false;},{passive:true});
+function ringCenter(){const r=frame.getBoundingClientRect();return {x:r.left+r.width/2,y:r.top+r.height/2};}
+function startOrbit(e){
+  if(e.button!==0)return;
+  orbitDidDrag=false;const center=ringCenter();
+  orbitDragState={x:e.clientX,y:e.clientY,center,last:Math.atan2(e.clientY-center.y,e.clientX-center.x),handle:e.currentTarget.id==='orbit-drag'};
+  (e.target.closest('.photo-button')||e.currentTarget).setPointerCapture(e.pointerId);document.body.classList.add('orbit-dragging');e.stopPropagation();
+}
+function moveOrbit(e){
+  if(!orbitDragState)return;
+  const s=orbitDragState;
+  if(Math.hypot(e.clientX-s.x,e.clientY-s.y)>4)orbitDidDrag=true;
+  if(!orbitDidDrag)return;
+  if(s.handle){orbitAngle+=(e.clientX-s.x)*.006;s.x=e.clientX;s.y=e.clientY;}
+  else{const angle=Math.atan2(e.clientY-s.center.y,e.clientX-s.center.x);orbitAngle+=Math.atan2(Math.sin(angle-s.last),Math.cos(angle-s.last));s.last=angle;}
+  refreshOrbit();e.preventDefault();e.stopPropagation();
+}
+function endOrbit(){
+  if(!orbitDragState)return;orbitDragState=null;document.body.classList.remove('orbit-dragging');
+  if(orbitDidDrag){const step=Math.PI*2/(innerWidth<=900?8:14);const offset=Math.round(orbitAngle/step);orbitAngle=0;navigateTo(photoIndex.get(current.id)-offset,true);}
+  refreshOrbit();
+}
+for(const target of [archiveNode,$('#orbit-drag')]){
+  target.addEventListener('pointerdown',startOrbit);target.addEventListener('pointermove',moveOrbit);
+  target.addEventListener('pointerup',endOrbit);target.addEventListener('pointercancel',endOrbit);
+}
+$('#orbit-prev').addEventListener('click',()=>navigateTo(photoIndex.get(current.id)-1));
+$('#orbit-next').addEventListener('click',()=>navigateTo(photoIndex.get(current.id)+1));
+$('#eras').addEventListener('click',e=>{const heading=e.target.closest('h2');if(!heading)return;const year=Number(heading.parentElement.dataset.year);navigateTo(archive.photos.findIndex(p=>p.era===year));});
+for(const heading of $('#eras').querySelectorAll('h2')){heading.tabIndex=0;heading.setAttribute('role','button');heading.setAttribute('aria-label',`${heading.textContent} 사진 선택`);heading.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();heading.click();}});}
+$('#history-toggle').addEventListener('click',()=>{const open=document.body.classList.toggle('history-open');$('#history-toggle').setAttribute('aria-expanded',String(open));$('#history-toggle').textContent=open?'닫기':'연표';});
+$('#story-stages').addEventListener('click',e=>{
+  const button=e.target.closest('[data-story]');if(!button)return;
+  const step=Number(button.dataset.story);
+  if(step===0){if(current.kind==='ending')leaveEnding();return;}
+  requestedEndingMode=step===2?'scattered':'gathered';
+  if(current.kind==='ending'){endingMode=requestedEndingMode;layoutEnding();return;}
+  navigateTo(archive.photos.length-1,true);
+});
 
-archiveNode.addEventListener('scroll',()=>{
-  if(!archiveHasGesture||archiveSnap)return;
-  const photo=nearestArchivePhoto();
-  navigateTo(photoIndex.get(photo.id),true);
-  clearTimeout(archiveIdle);
-  archiveIdle=setTimeout(()=>{
-    const button=buttons.get(photo.id);
-    const r=button.getBoundingClientRect(),nav=archiveNode.getBoundingClientRect();
-    const target=archiveNode.scrollTop+r.top-nav.top+r.height/2-archiveNode.clientHeight*.42;
-    archiveSnap=true;
-    archiveNode.scrollTo({top:Math.max(0,target),behavior:reduced?'instant':'smooth'});
-    setTimeout(()=>{archiveSnap=false;archiveHasGesture=false;},500);
-  },180);
-},{passive:true});
 // No artistic zoom bounds: only reject non-finite floating-point results.
 function finiteScale(value,factor){const next=value*factor;return Number.isFinite(next)&&next>0?next:value;}
 function zoomModel(delta){targetModelZoom=finiteScale(targetModelZoom,Math.exp(-delta*.003));dirty=true;}
@@ -388,12 +426,7 @@ function moveStructure(delta){
     const direction=Math.sign(structureDelta);structureDelta-=direction*110;
     navigateTo(Math.round(targetTravel)+direction,true);moved=true;
   }
-  if(moved){
-    clearTimeout(archiveIdle);archiveHasGesture=false;archiveSnap=true;
-    const button=buttons.get(current.id),r=button.getBoundingClientRect(),nav=archiveNode.getBoundingClientRect();
-    archiveNode.scrollTo({top:Math.max(0,archiveNode.scrollTop+r.top-nav.top+r.height/2-archiveNode.clientHeight*.42),behavior:reduced?'instant':'smooth'});
-    setTimeout(()=>archiveSnap=false,500);
-  }
+  if(moved)refreshOrbit();
 }
 $('#timeline-bottom-scroll').addEventListener('wheel',e=>{
   e.preventDefault();e.stopPropagation();
@@ -598,6 +631,8 @@ function stopEnding(){
   endingGeneration++;
   for(const timer of endingTimers)clearTimeout(timer);endingTimers=[];
   document.body.classList.remove('ending-mode');
+  $('#narrative-title').textContent='거리를 채우던 간판은 왜 정비의 대상이 되었을까?';
+  for(const button of $('#story-stages').children){if(button.dataset.story==='0')button.setAttribute('aria-current','step');else button.removeAttribute('aria-current');}
   $('#ending-scene').hidden=true;$('#ending-scene').dataset.phase='idle';
   $('#ending-intro').removeAttribute('src');$('#ending-intro').hidden=true;
   $('#ending-collage').replaceChildren();$('#ending-message').classList.remove('visible');
@@ -611,15 +646,33 @@ function layoutEnding(){
   const cols=innerWidth<700?3:6,rows=Math.ceil(count/cols);
   photos.forEach((img,i)=>{
     const ratio=Number(img.dataset.ratio),cell=Number(img.dataset.cell);
-    const targetWidth=innerWidth*(innerWidth<700?.5+Number(img.dataset.scale)*.25:.22+Number(img.dataset.scale)*.13);
-    const w=Math.min(targetWidth,innerHeight*.38*ratio),h=w/ratio;
-    const cx=((cell%cols)+.5+Number(img.dataset.jitterX)*.32)/cols*innerWidth;
-    const cy=(Math.floor(cell/cols)+.5+Number(img.dataset.jitterY)*.32)/rows*innerHeight;
-    img.style.width=`${w}px`;img.style.height=`${h}px`;
-    img.style.left=`${clamp(cx-w/2,0,Math.max(0,innerWidth-w))}px`;
-    img.style.top=`${clamp(cy-h/2,0,Math.max(0,innerHeight-h))}px`;
+    let w,h,x,y;
+    if(endingMode==='gathered'){
+      w=Math.min(innerWidth*(innerWidth<700?.19:.115),innerHeight*.16*ratio);h=w/ratio;
+      const angle=-Math.PI/2+i*Math.PI*2/Math.max(1,count);
+      x=innerWidth/2+Math.cos(angle)*innerWidth*.35-w/2;
+      y=innerHeight/2+Math.sin(angle)*innerHeight*.32-h/2;
+    }else{
+      w=Math.min(innerWidth*(innerWidth<700?.5+Number(img.dataset.scale)*.25:.20+Number(img.dataset.scale)*.12),innerHeight*.35*ratio);h=w/ratio;
+      const cx=((cell%cols)+.5+Number(img.dataset.jitterX)*.32)/cols*innerWidth;
+      const cy=(Math.floor(cell/cols)+.5+Number(img.dataset.jitterY)*.32)/rows*innerHeight;
+      x=clamp(cx-w/2,0,Math.max(0,innerWidth-w));y=clamp(cy-h/2,0,Math.max(0,innerHeight-h));
+    }
+    img.style.width=`${w}px`;img.style.height=`${h}px`;img.style.left=`${x}px`;img.style.top=`${y}px`;
   });
+  $('#ending-scene').dataset.layout=endingMode;
+  $('#ending-scatter').textContent=endingMode==='gathered'?'흩어 보기':'다시 모으기';
+  $('#ending-message').textContent=endingMode==='gathered'?archive.ending.message:'개선된 간판, 흩어진 정보';
 }
+function makeEndingPhotoDraggable(img){
+  let drag;
+  img.draggable=false;img.tabIndex=0;img.setAttribute('aria-label','드래그하여 간판 사진 이동');
+  img.addEventListener('pointerdown',e=>{if(e.button!==0)return;const r=img.getBoundingClientRect();drag={x:e.clientX,y:e.clientY,left:r.left,top:r.top};img.setPointerCapture(e.pointerId);img.style.zIndex=String(Date.now()%100000);e.stopPropagation();});
+  img.addEventListener('pointermove',e=>{if(!drag)return;img.style.left=`${drag.left+e.clientX-drag.x}px`;img.style.top=`${drag.top+e.clientY-drag.y}px`;e.preventDefault();});
+  img.addEventListener('pointerup',()=>drag=null);img.addEventListener('pointercancel',()=>drag=null);
+  img.addEventListener('keydown',e=>{const delta={ArrowLeft:[-16,0],ArrowRight:[16,0],ArrowUp:[0,-16],ArrowDown:[0,16]}[e.key];if(delta){e.preventDefault();e.stopPropagation();img.style.left=`${parseFloat(img.style.left)+delta[0]}px`;img.style.top=`${parseFloat(img.style.top)+delta[1]}px`;}});
+}
+$('#ending-scatter').addEventListener('click',()=>{endingMode=endingMode==='gathered'?'scattered':'gathered';layoutEnding();});
 function revealEndingPhotos(token){
   const config=archive.ending,container=$('#ending-collage');
   $('#ending-scene').dataset.phase='collage';
@@ -630,7 +683,7 @@ function revealEndingPhotos(token){
     img.width=photo.width;img.height=photo.height;img.decoding='async';
     img.dataset.ratio=photo.width/photo.height;img.dataset.cell=cells[i];img.dataset.scale=randomNumber();
     img.dataset.jitterX=randomNumber()*2-1;img.dataset.jitterY=randomNumber()*2-1;
-    img.style.aspectRatio=`${photo.width} / ${photo.height}`;container.append(img);
+    img.style.aspectRatio=`${photo.width} / ${photo.height}`;container.append(img);makeEndingPhotoDraggable(img);
     // Visibility begins only after the actual image decodes, so every photograph
     // emerges from black instead of popping in after an already-finished fade.
     img.decode().then(()=>{
@@ -638,11 +691,12 @@ function revealEndingPhotos(token){
     }).catch(error=>console.error('Ending photo failed',photo.src,error));
   });
   layoutEnding();
-  $('#ending-message').textContent=config.message;
+  $('#ending-message').textContent=endingMode==='gathered'?config.message:'개선된 간판, 흩어진 정보';
   endingLater(()=>$('#ending-message').classList.add('visible'),reduced?0:config.photos.length*config.timing.stagger+config.timing.photoFade,token);
 }
 async function startEnding(previous){
   const token=endingGeneration,config=archive.ending;
+  endingMode=requestedEndingMode;requestedEndingMode='gathered';
   endingReturnIndex=previous&&previous.kind!=='ending'?photoIndex.get(previous.id):archive.photos.length-2;
   document.body.classList.add('ending-mode');$('#ending-scene').hidden=false;$('#ending-scene').dataset.phase='black';
   $('#ending-back').focus({preventScroll:true});
