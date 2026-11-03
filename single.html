@@ -4516,10 +4516,16 @@ $('#timeline').addEventListener('wheel',scrollRightTimeline,{passive:false});
 $('#timeline-scroll-zone').addEventListener('wheel',scrollRightTimeline,{passive:false});
 let structureDelta=0;
 function moveStructure(delta){
-  structureDelta+=delta;
+  structureDelta+=delta;let moved=false;
   while(Math.abs(structureDelta)>=110){
     const direction=Math.sign(structureDelta);structureDelta-=direction*110;
-    navigateTo(Math.round(targetTravel)+direction,true);
+    navigateTo(Math.round(targetTravel)+direction,true);moved=true;
+  }
+  if(moved){
+    clearTimeout(archiveIdle);archiveHasGesture=false;archiveSnap=true;
+    const button=buttons.get(current.id),r=button.getBoundingClientRect(),nav=archiveNode.getBoundingClientRect();
+    archiveNode.scrollTo({top:Math.max(0,archiveNode.scrollTop+r.top-nav.top+r.height/2-archiveNode.clientHeight*.42),behavior:reduced?'instant':'smooth'});
+    setTimeout(()=>archiveSnap=false,500);
   }
 }
 $('#timeline-bottom-scroll').addEventListener('wheel',e=>{
