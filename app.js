@@ -306,7 +306,9 @@ for(const era of archive.eras) {
   const item=document.createElement('section');item.className='era-event';item.dataset.year=era.year;
   const heading=document.createElement('h2');heading.textContent=`${era.year}s`;
   const policy=document.createElement('p');policy.textContent=era.policy;
-  item.append(heading,policy);$('#eras').append(item);
+  const material=document.createElement('p');material.className='material-change';
+  material.setAttribute('aria-label','재질·기술·표현의 변화');material.textContent=era.materialChange;
+  item.append(heading,material,policy);$('#eras').append(item);
 }
 
 // Two independent input regions: archive scroll selects, model wheel zooms.

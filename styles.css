@@ -35,3 +35,5 @@ html,body{height:100%;overflow:hidden;overscroll-behavior:none}
 #caption{position:relative;z-index:2;pointer-events:auto}
 #archive,#timeline{z-index:3}
 #debug-overlay{pointer-events:auto}
+
+.era-event .material-change{color:#560e45;margin:0 0 20px;line-height:1.7}
