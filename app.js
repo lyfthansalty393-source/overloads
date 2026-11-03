@@ -255,7 +255,7 @@ async function selectPhoto(photo) {
   const request=++generation;loadingPhoto=true;
   current=photo;currentConfig=photo.spatial?structuredClone(configMap.get(photo.id)):null;entrance=0;
   rotationX=photo.spatial?.10:0;rotationY=photo.spatial?.18:0;rotationZ=0;targetModelZoom=1;
-  targetModelRotation.setFromEuler(new THREE.Euler(rotationX,rotationY,rotationZ,'XYZ'));
+  targetModelRotation.setFromEuler(new THREE.Euler(rotationX,rotationY,rotationZ,'YXZ'));
   archiveNode.querySelectorAll('.scroll-selected').forEach(el=>el.classList.remove('scroll-selected'));
   buttons.get(photo.id)?.classList.add('scroll-selected');
   $('#photo-year').textContent=`${photo.year}s`;
@@ -358,24 +358,19 @@ function rotateModel(x,y,z){
   for(const [axis,angle] of [['x',x],['y',y],['z',z]])if(angle){q.setFromAxisAngle(axes[axis],angle);targetModelRotation.premultiply(q);}
   targetModelRotation.normalize();rotationX+=x;rotationY+=y;rotationZ+=z;dirty=true;
 }
-// Object-centered virtual trackball: drag endpoints define one quaternion.
-// Sensitivity follows the visible model size instead of fixed radians per pixel.
+// Upright turntable: yaw never rolls the horizon, pitch cannot cross a pole.
+const maxUprightPitch=THREE.MathUtils.degToRad(80);
 function dragSurface(){
   const r=frame.getBoundingClientRect();
-  return {cx:r.left+r.width/2,cy:r.top+r.height/2,
-    radius:Math.max(100,Math.min(Math.min(innerWidth,innerHeight)*.48,r.height*.48*modelZoom))};
+  return {radius:Math.max(100,Math.min(Math.min(innerWidth,innerHeight)*.48,r.height*.48*modelZoom))};
 }
-function trackballPoint(x,y,surface){
-  const px=(x-surface.cx)/surface.radius,py=(surface.cy-y)/surface.radius;
-  const d=px*px+py*py;
-  const z=d<=.5?Math.sqrt(1-d):.5/Math.sqrt(d);
-  return new THREE.Vector3(px,py,z).normalize();
+function applyUprightRotation(){
+  targetModelRotation.setFromEuler(new THREE.Euler(rotationX,rotationY,rotationZ,'YXZ')).normalize();dirty=true;
 }
 function beginModelDrag(x,y,roll=false){
-  targetModelRotation.copy(modelRig.quaternion);
   const surface=dragSurface();
   activeModelDrag={x,y,lastX:x,lastY:y,roll,distance:0,surface,
-    startVector:trackballPoint(x,y,surface),startRotation:modelRig.quaternion.clone()};
+    startPitch:rotationX,startYaw:rotationY,startRoll:rotationZ};
 }
 modelLayer.addEventListener('contextmenu',e=>e.preventDefault());
 modelLayer.addEventListener('pointerdown',e=>{
@@ -398,22 +393,21 @@ modelLayer.addEventListener('pointermove',e=>{
     const [a,b]=[...modelPointers.values()];
     targetModelZoom=finiteScale(modelPinch.zoom,Math.hypot(a.x-b.x,a.y-b.y)/Math.max(.001,modelPinch.distance));
     const angle=Math.atan2(b.y-a.y,b.x-a.x);let twist=angle-modelPinch.angle;
-    twist=Math.atan2(Math.sin(twist),Math.cos(twist));rotateModel(0,0,-twist);modelPinch.angle=angle;modelDragged=true;
+    // A pinch only zooms: incidental finger twist must not flip the horizon.
+    modelPinch.angle=angle;modelDragged=true;
   }else if(activeModelDrag){
     const d=activeModelDrag;
     const roll=!!(e.buttons&2)||e.shiftKey;
     if(roll!==d.roll){modelRig.quaternion.copy(targetModelRotation);beginModelDrag(e.clientX,e.clientY,roll);return;}
     const dx=e.clientX-d.lastX,dy=e.clientY-d.lastY;
     d.distance+=Math.hypot(dx,dy);if(d.distance>3)modelDragged=true;
-    const delta=new THREE.Quaternion();
     if(d.roll){
-      delta.setFromAxisAngle(axes.z,-(e.clientX-d.x)/d.surface.radius);
-      rotationZ-=dx/d.surface.radius;
+      rotationZ=d.startRoll-(e.clientX-d.x)/d.surface.radius;
     }else{
-      delta.setFromUnitVectors(d.startVector,trackballPoint(e.clientX,e.clientY,d.surface));
-      rotationX+=dy/d.surface.radius;rotationY+=dx/d.surface.radius;
+      rotationY=d.startYaw+(e.clientX-d.x)/d.surface.radius;
+      rotationX=clamp(d.startPitch+(e.clientY-d.y)/d.surface.radius,-maxUprightPitch,maxUprightPitch);
     }
-    targetModelRotation.copy(delta).multiply(d.startRotation).normalize();
+    applyUprightRotation();
     d.lastX=e.clientX;d.lastY=e.clientY;
   }
   dirty=true;
