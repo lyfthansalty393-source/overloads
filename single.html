@@ -18,18 +18,22 @@
 @media(max-width:700px){#archive{width:16vw}.era-label{margin-left:2vw;font-size:10px}#stage{left:16%;right:22%;gap:2vh}#picture-frame,#caption{width:94%}#caption{font-size:11px;line-height:1.65}#timeline{width:22%;padding:5vh 2vw}.era-event{padding-bottom:4vh}.era-event h2{font-size:13px}.era-event p{font-size:10px}.era-event.active::before{left:calc(-2vw - 6px)}#back{top:12px;left:12px}#debug-panel{left:17vw;max-width:80vw}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{transition:none!important}}
 
-/* Fixed archive and timeline: only explicit archive scrolling moves thumbnails. */
+/* Independent photo timeline and 3D interaction surfaces. */
 html,body{height:100%;overflow:hidden;overscroll-behavior:none}
-#archive{position:fixed;inset:0 auto 0 0;height:100dvh;min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none;padding-bottom:12vh}
-#archive::-webkit-scrollbar{display:none}
-#stage,#scene{touch-action:none}
-#picture-frame{outline:0;border:0}
-#eras{transform:none!important;transition:none}
-#timeline{overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none;border-left:0}
-#timeline::-webkit-scrollbar{display:none}
-.era-event.active::before,.photo-button[aria-current="true"]::after{display:none}
-
-.era-event:not(.active){display:none}
+#archive{position:fixed;inset:0 auto 0 0;width:calc(9.3vw + 24px);padding-right:24px;height:100dvh;min-height:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;scrollbar-width:none;padding-bottom:44vh;scroll-behavior:smooth}
+#archive::-webkit-scrollbar,#timeline::-webkit-scrollbar{display:none}
+#stage{left:calc(9.3% + 24px)}
+#picture-frame,#scene{touch-action:none}
+#picture-frame{outline:0;border:0;cursor:grab}
+#picture-frame.rotating{cursor:grabbing}
+#timeline{overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none}
+#eras{transition:transform .5s ease}
+.photo-button.scroll-selected,.photo-button[aria-current="true"]{transform:translateX(24px);filter:brightness(1)}
+.photo-button.scroll-selected:hover,.photo-button[aria-current="true"]:hover{transform:translate(24px,-5px)}
+@font-face{font-family:Pretendard;src:url('./assets/fonts/PretendardVariable.woff2') format('woff2');font-style:normal;font-weight:100 900;font-display:swap}
+#back{display:inline-flex;align-items:center;gap:8px;background:transparent;border:0;outline:0;box-shadow:none;font-family:Pretendard,sans-serif;font-size:14pt;font-weight:400;letter-spacing:-.3px;color:#fafafa;padding:12px 0}
+#back:focus-visible{text-decoration:underline;text-underline-offset:4px}
+@media(max-width:700px){#archive{width:calc(16vw + 24px)}#stage{left:calc(16% + 24px)}}
 
 </style>
 </head>
@@ -45,7 +49,7 @@ html,body{height:100%;overflow:hidden;overscroll-behavior:none}
   </main>
   <aside id="timeline" aria-label="시대별 제도"><div id="eras"></div></aside>
   <dialog id="enlarged" aria-label="확대한 사진">
-    <button id="back" type="button">← 뒤돌아가기</button>
+    <button id="back" type="button" aria-label="되돌아가기"><span aria-hidden="true">&lt;</span><span>되돌아가기</span></button>
     <div id="zoom-surface"><img id="zoom-photo" alt=""></div>
   </dialog>
   <script id="archive-data" type="application/json">{
@@ -3412,10 +3416,11 @@ const [archive, configurations] = await Promise.all([
 const configMap = new Map(configurations.map(c => [c.id, c]));
 const spatial = archive.photos.filter(p => p.spatial);
 const buttons = new Map();
+const archiveNode=$('#archive');
 let current, currentConfig, activeButton, generation = 0, currentTexture, loadingPhoto=false;
-let frameProgress = 0, dirty = true, disposed = false;
-let travel=0, targetTravel=0, travelVelocity=0, settleTimer;
-let entrance=0, pointerX=0, pointerY=0, lookX=0, lookY=0, lastFrame=0;
+let dirty = true, disposed = false;
+let travel=0, targetTravel=0, travelVelocity=0;
+let entrance=0, lastFrame=0;
 const photoIndex=new Map(archive.photos.map((p,i)=>[p.id,i]));
 const frame = $('#picture-frame');
 const canvas = $('#scene');
@@ -3433,7 +3438,11 @@ try {
   canvas.hidden = true;
 }
 const room = new THREE.Group();
-scene.add(room);
+const outlineGroup = new THREE.Group();
+scene.add(room,outlineGroup);
+let orbitYaw=.18, orbitPitch=.10, targetOrbitYaw=.18, targetOrbitPitch=.10;
+let modelZoom=1, targetModelZoom=1, modelDragged=false, activeModelDrag;
+const modelPointers=new Map();let modelPinch;
 const loader = new THREE.TextureLoader();
 
 // Eight unknowns, h33 = 1. Solve the projectivity, not a bilinear UV warp.
@@ -3562,6 +3571,7 @@ function rebuild() {
   while(room.children.length) {
     const m=room.children[0];room.remove(m);m.geometry.dispose();m.material.dispose();
   }
+  while(outlineGroup.children.length){const line=outlineGroup.children[0];outlineGroup.remove(line);line.geometry.dispose();line.material.dispose();}
   if(!current.spatial){
     derived=null;
     const geometry=new THREE.PlaneGeometry(current.width/current.height,1);
@@ -3572,8 +3582,14 @@ function rebuild() {
   derived=deriveRoom(currentConfig,current.width/current.height);
   const skyColors=sampleSky(currentTexture);
   const {width:pw,height:ph}=current;
+  const outlineEdges=new Map();
   for(const [name,region] of Object.entries(derived.regions)) {
     const vertices=region.vertices.map(v=>v.clone());
+    for(let i=0;i<4;i++){
+      const a=vertices[i],b=vertices[(i+1)%4];
+      const keys=[a.toArray().join(','),b.toArray().join(',')].sort();
+      outlineEdges.set(keys.join('|'),[a,b]);
+    }
     const farSky=false; // The immersive room keeps the sky on its actual ceiling.
     let sourceRegion=region.source;
     if(farSky) {
@@ -3609,6 +3625,9 @@ function rebuild() {
     const mesh=new THREE.Mesh(geometry,material);mesh.name=name;mesh.renderOrder=name==='back'?2:1;
     room.add(mesh);
   }
+  const lineGeometry=new THREE.BufferGeometry().setFromPoints([...outlineEdges.values()].flat());
+  const lineMaterial=new THREE.LineBasicMaterial({color:0xfafafa,transparent:true,opacity:.55,depthWrite:false,depthTest:false});
+  const lines=new THREE.LineSegments(lineGeometry,lineMaterial);lines.name='room-outlines';lines.renderOrder=5;outlineGroup.add(lines);
   camera.near=Math.max(.001,derived.f*.01);camera.far=derived.backDistance+derived.depth*12+10;
   resize();drawDebug();dirty=true;
 }
@@ -3628,6 +3647,9 @@ async function selectPhoto(photo) {
   if(current?.id===photo.id)return;
   const request=++generation;loadingPhoto=true;
   current=photo;currentConfig=photo.spatial?structuredClone(configMap.get(photo.id)):null;entrance=0;
+  targetOrbitYaw=.18;targetOrbitPitch=.10;targetModelZoom=1;
+  archiveNode.querySelectorAll('.scroll-selected').forEach(el=>el.classList.remove('scroll-selected'));
+  buttons.get(photo.id)?.classList.add('scroll-selected');
   $('#photo-year').textContent=`${photo.year}s`;
   $('#photo-description').textContent=photo.description;
   if(activeButton)activeButton.removeAttribute('aria-current');
@@ -3654,7 +3676,8 @@ function updateTimeline(year) {
   for(const el of $('#eras').children) {
     const yes=Number(el.dataset.year)===year;el.classList.toggle('active',yes);if(yes)active=el;
   }
-  // The timeline stays physically stationary; only its active item changes.
+  // Restore the earlier multi-era text presentation. Model gestures never call it.
+  if(active)$('#eras').style.transform=`translateY(${-active.offsetTop}px)`;
 }
 
 for(const era of archive.eras) {
@@ -3668,7 +3691,7 @@ for(const era of archive.eras) {
     // A single uniform scale per thumbnail; portrait and landscape ratios stay original.
     const scale=Math.min(1,180/Math.max(photo.width,photo.height));
     img.style.width=`${photo.width*scale}px`;
-    button.append(img);button.addEventListener('click',()=>navigateTo(photoIndex.get(photo.id)));
+    button.append(img);button.addEventListener('click',()=>{clearTimeout(archiveIdle);archiveHasGesture=false;archiveSnap=false;navigateTo(photoIndex.get(photo.id));});
     buttons.set(photo.id,button);section.append(button);
   }
   $('#archive').append(section);
@@ -3678,7 +3701,8 @@ for(const era of archive.eras) {
   item.append(heading,policy);$('#eras').append(item);
 }
 
-// Fixed, independently scrollable archive. Stage gestures never scroll it.
+// Two independent input regions: archive scroll selects, model wheel zooms.
+let archiveIdle, archiveSnap=false, archiveHasGesture=false;
 function navigateTo(index, immediate=false) {
   targetTravel=clamp(index,0,archive.photos.length-1);
   if(immediate||reduced){travel=targetTravel;travelVelocity=0;}
@@ -3686,25 +3710,65 @@ function navigateTo(index, immediate=false) {
   dirty=true;
 }
 function onScroll(){dirty=true;}
-function pushTravel(delta) {
-  targetTravel=clamp(targetTravel+delta,0,archive.photos.length-1);
-  clearTimeout(settleTimer);
-  settleTimer=setTimeout(()=>{targetTravel=Math.round(targetTravel);dirty=true;},180);
+function nearestArchivePhoto(){
+  const marker=archiveNode.getBoundingClientRect().top+archiveNode.clientHeight*.42;
+  let best=archive.photos[0],distance=Infinity;
+  for(const photo of archive.photos){const r=buttons.get(photo.id).getBoundingClientRect();const d=Math.abs((r.top+r.bottom)/2-marker);if(d<distance){distance=d;best=photo;}}
+  return best;
+}
+archiveNode.addEventListener('wheel',()=>{archiveHasGesture=true;archiveSnap=false;},{passive:true});
+archiveNode.addEventListener('touchstart',()=>{archiveHasGesture=true;archiveSnap=false;},{passive:true});
+
+archiveNode.addEventListener('scroll',()=>{
+  if(!archiveHasGesture||archiveSnap)return;
+  const photo=nearestArchivePhoto();
+  navigateTo(photoIndex.get(photo.id),true);
+  clearTimeout(archiveIdle);
+  archiveIdle=setTimeout(()=>{
+    const button=buttons.get(photo.id);
+    const r=button.getBoundingClientRect(),nav=archiveNode.getBoundingClientRect();
+    const target=archiveNode.scrollTop+r.top-nav.top+r.height/2-archiveNode.clientHeight*.42;
+    archiveSnap=true;
+    archiveNode.scrollTo({top:Math.max(0,target),behavior:reduced?'instant':'smooth'});
+    setTimeout(()=>{archiveSnap=false;archiveHasGesture=false;},500);
+  },180);
+},{passive:true});
+function zoomModel(delta){
+  targetModelZoom=clamp(targetModelZoom*Math.exp(-delta*.0015),.55,4.8);
   dirty=true;
 }
 $('#stage').addEventListener('wheel',e=>{
+  e.preventDefault();e.stopPropagation();
   if(debug||dialog.open)return;
-  e.preventDefault();
   const unit=e.deltaMode===1?16:e.deltaMode===2?innerHeight:1;
-  pushTravel(clamp(e.deltaY*unit,-240,240)*.0045);
+  zoomModel(e.deltaY*unit);
 },{passive:false});
-$('#timeline').addEventListener('wheel',e=>{e.preventDefault();pushTravel(clamp(e.deltaY,-240,240)*.0045);},{passive:false});
-let touchY;
-$('#stage').addEventListener('touchstart',e=>{touchY=e.touches[0].clientY;},{passive:true});
-$('#stage').addEventListener('touchmove',e=>{if(debug||touchY==null||dialog.open)return;e.preventDefault();const y=e.touches[0].clientY;pushTravel((touchY-y)*.009);touchY=y;},{passive:false});
-$('#stage').addEventListener('touchend',()=>{touchY=null;targetTravel=Math.round(targetTravel);});
-$('#stage').addEventListener('pointermove',e=>{const r=$('#stage').getBoundingClientRect();pointerX=clamp((e.clientX-r.left)/r.width*2-1,-1,1);pointerY=clamp((e.clientY-r.top)/r.height*2-1,-1,1);dirty=true;});
-$('#stage').addEventListener('pointerleave',()=>{pointerX=pointerY=0;dirty=true;});
+// Right-hand text has its own native scrolling; it never changes photos or zoom.
+$('#timeline').addEventListener('wheel',e=>e.stopPropagation(),{passive:true});
+frame.addEventListener('pointerdown',e=>{
+  if(debug||e.button!==0)return;
+  frame.setPointerCapture(e.pointerId);modelDragged=false;
+  modelPointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  activeModelDrag={x:e.clientX,y:e.clientY,yaw:targetOrbitYaw,pitch:targetOrbitPitch};
+  if(modelPointers.size===2){const [a,b]=[...modelPointers.values()];modelPinch={distance:Math.hypot(a.x-b.x,a.y-b.y),zoom:targetModelZoom};}
+  frame.classList.add('rotating');
+});
+frame.addEventListener('pointermove',e=>{
+  if(debug||!modelPointers.has(e.pointerId))return;
+  modelPointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
+  if(modelPointers.size===2&&modelPinch){
+    const [a,b]=[...modelPointers.values()];
+    targetModelZoom=clamp(modelPinch.zoom*Math.hypot(a.x-b.x,a.y-b.y)/Math.max(1,modelPinch.distance),.55,4.8);modelDragged=true;
+  }else if(activeModelDrag){
+    const dx=e.clientX-activeModelDrag.x,dy=e.clientY-activeModelDrag.y;
+    if(Math.hypot(dx,dy)>4)modelDragged=true;
+    targetOrbitYaw=clamp(activeModelDrag.yaw-dx*.003,-Math.PI/9,Math.PI/9);
+    targetOrbitPitch=clamp(activeModelDrag.pitch+dy*.002,-Math.PI/18,Math.PI/18);
+  }
+  dirty=true;
+});
+function releaseModel(e){modelPointers.delete(e.pointerId);modelPinch=null;activeModelDrag=null;frame.classList.remove('rotating');}
+frame.addEventListener('pointerup',releaseModel);frame.addEventListener('pointercancel',releaseModel);
 addEventListener('keydown',e=>{
   if(dialog.open||debug||e.target.closest('select, input, textarea'))return;
   if(['ArrowDown','PageDown','ArrowRight','ArrowUp','PageUp','ArrowLeft','Home','End'].includes(e.key)){
@@ -3729,8 +3793,9 @@ surface.addEventListener('pointermove',e=>{const old=pointers.get(e.pointerId);i
 function release(e){pointers.delete(e.pointerId);pinch=null;surface.classList.remove('dragging');}
 surface.addEventListener('pointerup',release);surface.addEventListener('pointercancel',release);
 surface.addEventListener('click',()=>{if(dragged)return;zoom=zoom===1?2:1;panX=panY=0;paintZoom();});
-frame.addEventListener('click',e=>{if(!debug&&current)openPhoto(current);});
-frame.tabIndex=0;frame.setAttribute('role','button');frame.setAttribute('aria-label','공간 사진 확대');
+frame.addEventListener('click',()=>{if(!debug&&current&&!current.spatial&&!modelDragged)openPhoto(current);});
+frame.addEventListener('dblclick',()=>{if(!debug&&current&&!modelDragged)openPhoto(current);});
+frame.tabIndex=0;frame.setAttribute('role','group');frame.setAttribute('aria-label','5면 공간 모델: 드래그 회전, 휠 확대·축소, Enter 원본 확대');
 frame.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();if(current)openPhoto(current);}});
 
 function render(time=0) {
@@ -3745,36 +3810,37 @@ function render(time=0) {
   if(Math.abs(targetTravel-travel)<.6 && current?.id!==archive.photos[index].id)selectPhoto(archive.photos[index]);
   const damping=1-Math.exp(-dt*6);
   entrance+=(1-entrance)*(reduced?1:damping);
-  lookX+=(pointerX-lookX)*damping;lookY+=(pointerY-lookY)*damping;
+  const orbitMoving=Math.abs(targetOrbitYaw-orbitYaw)+Math.abs(targetOrbitPitch-orbitPitch)+Math.abs(targetModelZoom-modelZoom)>.00001;
+  orbitYaw+=(targetOrbitYaw-orbitYaw)*damping;orbitPitch+=(targetOrbitPitch-orbitPitch)*damping;
+  modelZoom+=(targetModelZoom-modelZoom)*damping;
   if(!renderer || !currentTexture || !current || loadingPhoto)return;
-  if(!dirty && Math.abs(displacement)<.0001 && entrance>.9999 && Math.abs(pointerX-lookX)+Math.abs(pointerY-lookY)<.0001)return;
+  if(!dirty && Math.abs(displacement)<.0001 && entrance>.9999 && !orbitMoving)return;
   dirty=false;
   camera.aspect=current.width/current.height;
   let yaw=0,pitch=0;
   if(current.spatial&&derived&&currentConfig){
-    frameProgress=1-Math.min(1,Math.abs(travel-Math.round(travel))*2);
-    const dive=debug?0:entrance;
-    yaw=debug||reduced?0:clamp(lookX*THREE.MathUtils.degToRad(15)+travelVelocity*.008,-Math.PI/9,Math.PI/9);
-    pitch=debug||reduced?0:clamp(lookY*THREE.MathUtils.degToRad(8),-Math.PI/18,Math.PI/18);
-    camera.fov=debug?50:90;
-    // Enter through the open front and stop inside the cube, facing the VP wall.
-    // Five surfaces acquire independent parallax, without orbiting an outer box.
-    const inside=derived.f+derived.side*(.12+.08*frameProgress);
-    camera.position.set(derived.cx*dive+lookX*derived.side*.035*dive,
-      derived.cy*dive-lookY*derived.side*.025*dive,-inside*dive);
-    camera.rotation.set(-pitch,-yaw,0,'YXZ');
+    yaw=debug?0:orbitYaw;pitch=debug?0:orbitPitch;
+    camera.fov=50;
+    // Stand outside the open front so all five surfaces are legible. Wheel zoom
+    // crosses the opening into the room; drag orbits the VP wall within limits.
+    const center=new THREE.Vector3(derived.cx,derived.cy,-derived.f-derived.side*.5);
+    const distance=derived.side*(1.8/modelZoom+(reduced?0:(1-entrance)*.35));
+    camera.position.set(center.x+Math.sin(yaw)*Math.cos(pitch)*distance,
+      center.y+Math.sin(pitch)*distance,center.z+Math.cos(yaw)*Math.cos(pitch)*distance);
+    camera.lookAt(center);
     camera.near=derived.side*.005;camera.far=derived.f+derived.side*12;
     camera.updateProjectionMatrix();
     if(debug){camera.projectionMatrix.elements[8]=1-2*currentConfig.vanishingPoint.x;camera.projectionMatrix.elements[9]=2*currentConfig.vanishingPoint.y-1;}
     camera.projectionMatrixInverse.copy(camera.projectionMatrix).invert();
     for(const mesh of room.children)mesh.material.uniforms.darkening.value=0;
   }else{
-    camera.fov=50;camera.position.set(0,0,1/(2*Math.tan(THREE.MathUtils.degToRad(25))));
+    const photoDistance=1 / (2 * Math.tan(THREE.MathUtils.degToRad(25)));
+    camera.fov=50;camera.position.set(0,0,photoDistance/modelZoom);
     camera.rotation.set(0,0,0);camera.near=.01;camera.far=100;camera.updateProjectionMatrix();
   }
   renderer.render(scene,camera);
   window.__signArchive={id:current.id,faces:room.children.map(m=>m.name),depth:derived?.depth??0,
-    cubeSide:derived?.side??0,cameraZ:camera.position.z,entrance,travel,targetTravel,
+    cubeSide:derived?.side??0,cameraZ:camera.position.z,entrance,travel,targetTravel,modelZoom,outlineCount:outlineGroup.children.length,
     yawDegrees:THREE.MathUtils.radToDeg(yaw),pitchDegrees:THREE.MathUtils.radToDeg(pitch),
     textureCount:renderer.info.memory.textures,spatialCount:spatial.length};
 }

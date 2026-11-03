@@ -9,15 +9,19 @@
 @media(max-width:700px){#archive{width:16vw}.era-label{margin-left:2vw;font-size:10px}#stage{left:16%;right:22%;gap:2vh}#picture-frame,#caption{width:94%}#caption{font-size:11px;line-height:1.65}#timeline{width:22%;padding:5vh 2vw}.era-event{padding-bottom:4vh}.era-event h2{font-size:13px}.era-event p{font-size:10px}.era-event.active::before{left:calc(-2vw - 6px)}#back{top:12px;left:12px}#debug-panel{left:17vw;max-width:80vw}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{transition:none!important}}
 
-/* Fixed archive and timeline: only explicit archive scrolling moves thumbnails. */
+/* Independent photo timeline and 3D interaction surfaces. */
 html,body{height:100%;overflow:hidden;overscroll-behavior:none}
-#archive{position:fixed;inset:0 auto 0 0;height:100dvh;min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none;padding-bottom:12vh}
-#archive::-webkit-scrollbar{display:none}
-#stage,#scene{touch-action:none}
-#picture-frame{outline:0;border:0}
-#eras{transform:none!important;transition:none}
-#timeline{overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none;border-left:0}
-#timeline::-webkit-scrollbar{display:none}
-.era-event.active::before,.photo-button[aria-current="true"]::after{display:none}
-
-.era-event:not(.active){display:none}
+#archive{position:fixed;inset:0 auto 0 0;width:calc(9.3vw + 24px);padding-right:24px;height:100dvh;min-height:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;scrollbar-width:none;padding-bottom:44vh;scroll-behavior:smooth}
+#archive::-webkit-scrollbar,#timeline::-webkit-scrollbar{display:none}
+#stage{left:calc(9.3% + 24px)}
+#picture-frame,#scene{touch-action:none}
+#picture-frame{outline:0;border:0;cursor:grab}
+#picture-frame.rotating{cursor:grabbing}
+#timeline{overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none}
+#eras{transition:transform .5s ease}
+.photo-button.scroll-selected,.photo-button[aria-current="true"]{transform:translateX(24px);filter:brightness(1)}
+.photo-button.scroll-selected:hover,.photo-button[aria-current="true"]:hover{transform:translate(24px,-5px)}
+@font-face{font-family:Pretendard;src:url('./assets/fonts/PretendardVariable.woff2') format('woff2');font-style:normal;font-weight:100 900;font-display:swap}
+#back{display:inline-flex;align-items:center;gap:8px;background:transparent;border:0;outline:0;box-shadow:none;font-family:Pretendard,sans-serif;font-size:14pt;font-weight:400;letter-spacing:-.3px;color:#fafafa;padding:12px 0}
+#back:focus-visible{text-decoration:underline;text-underline-offset:4px}
+@media(max-width:700px){#archive{width:calc(16vw + 24px)}#stage{left:calc(16% + 24px)}}
