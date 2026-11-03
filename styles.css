@@ -163,27 +163,27 @@ body.ending-mode #model-layer,body.ending-mode #stage,body.ending-mode #archive,
 
 /* Actual per-era font assets; paragraphs retain the readable body face. */
 @font-face{font-family:Era1910;src:url('./assets/fonts/Era1910Specimen.otf') format('opentype');font-weight:400;font-style:normal;font-display:swap}
-#specimen-glyph.era-1910,.era-event[data-year="1910"] h2{font-family:Era1910,serif;font-weight:400}
+#specimen-glyph.era-1910{font-family:Era1910,serif;font-weight:400}
 @font-face{font-family:Era1920;src:url('./assets/fonts/NanumMyeongjo-Regular.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap}
-#specimen-glyph.era-1920,.era-event[data-year="1920"] h2{font-family:Era1920,serif;font-weight:400}
+#specimen-glyph.era-1920{font-family:Era1920,serif;font-weight:400}
 @font-face{font-family:Era1930;src:url('./assets/fonts/NanumBrushScript-Regular.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap}
-#specimen-glyph.era-1930,.era-event[data-year="1930"] h2{font-family:Era1930,serif;font-weight:400}
+#specimen-glyph.era-1930{font-family:Era1930,serif;font-weight:400}
 @font-face{font-family:Era1950;src:url('./assets/fonts/NanumPenScript-Regular.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap}
-#specimen-glyph.era-1950,.era-event[data-year="1950"] h2{font-family:Era1950,serif;font-weight:400}
+#specimen-glyph.era-1950{font-family:Era1950,serif;font-weight:400}
 @font-face{font-family:Era1960;src:url('./assets/fonts/BMYEONSUNG_ttf.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap}
-#specimen-glyph.era-1960,.era-event[data-year="1960"] h2{font-family:Era1960,serif;font-weight:400}
+#specimen-glyph.era-1960{font-family:Era1960,serif;font-weight:400}
 @font-face{font-family:Era1970;src:url('./assets/fonts/BMHANNA_11yrs_ttf.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap}
-#specimen-glyph.era-1970,.era-event[data-year="1970"] h2{font-family:Era1970,serif;font-weight:400}
+#specimen-glyph.era-1970{font-family:Era1970,serif;font-weight:400}
 @font-face{font-family:Era1980;src:url('./assets/fonts/BMJUA_ttf.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap}
-#specimen-glyph.era-1980,.era-event[data-year="1980"] h2{font-family:Era1980,serif;font-weight:400}
+#specimen-glyph.era-1980{font-family:Era1980,serif;font-weight:400}
 @font-face{font-family:Era1990;src:url('./assets/fonts/BMDOHYEON_ttf.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap}
-#specimen-glyph.era-1990,.era-event[data-year="1990"] h2{font-family:Era1990,serif;font-weight:400}
+#specimen-glyph.era-1990{font-family:Era1990,serif;font-weight:400}
 @font-face{font-family:Era2000;src:url('./assets/fonts/BMHANNAAir_ttf.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap}
-#specimen-glyph.era-2000,.era-event[data-year="2000"] h2{font-family:Era2000,serif;font-weight:400}
+#specimen-glyph.era-2000{font-family:Era2000,serif;font-weight:400}
 @font-face{font-family:Era2010;src:url('./assets/fonts/BMEULJIROTTF.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap}
-#specimen-glyph.era-2010,.era-event[data-year="2010"] h2{font-family:Era2010,serif;font-weight:400}
+#specimen-glyph.era-2010{font-family:Era2010,serif;font-weight:400}
 @font-face{font-family:Era2020;src:url('./assets/fonts/BMEuljiro10yearslater.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap}
-#specimen-glyph.era-2020,.era-event[data-year="2020"] h2{font-family:Era2020,serif;font-weight:400}
+#specimen-glyph.era-2020{font-family:Era2020,serif;font-weight:400}
 
 #ending-question-panel{position:absolute;inset:0;z-index:4;display:flex;align-items:center;justify-content:center;flex-direction:column;padding:7vw;opacity:0;pointer-events:none;transition:opacity .65s ease}
 #ending-question{font-family:Pretendard,sans-serif;color:#fafafa;font-size:clamp(28px,2.4vw,44px);line-height:1.65;text-align:center;margin:0;word-break:keep-all;max-width:1100px}
@@ -199,3 +199,25 @@ body.ending-mode #model-layer,body.ending-mode #stage,body.ending-mode #archive,
 #ending-scene.question-mode #ending-back{z-index:5}
 #ending-scene{touch-action:none}
 @media(max-width:700px){#ending-question{font-size:28px;line-height:1.6}#ending-question .question-lead{font-size:20px}#ending-question-panel{padding:24px}}
+
+/* Year typography stays unchanged; period fonts belong to the specimen only. */
+.era-event h2,.era-number,.era-suffix,#archive .era-label{font-family:Arial,"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif}
+#archive{position:fixed;inset:0;width:100vw;height:100dvh;min-height:0;padding:0;border:0;overflow:visible;z-index:0;pointer-events:none;background:transparent;touch-action:none}
+#archive .era-group{display:contents}#archive .era-label{display:none}
+#archive .photo-button{position:absolute;margin:0;padding:0;max-width:none;pointer-events:auto;touch-action:none;transform:translate(-50%,-50%);transition:filter .2s ease;filter:brightness(.75);z-index:1}
+#archive .photo-button img{display:block;width:100%!important;height:100%;object-fit:contain;max-width:none;user-select:none;pointer-events:none}
+#archive .photo-button.scroll-selected,#archive .photo-button[aria-current="true"]{transform:translate(-50%,-50%);filter:brightness(1);outline:1px solid #c3d132;outline-offset:4px}
+#archive .photo-button:hover,#archive .photo-button.scroll-selected:hover,#archive .photo-button[aria-current="true"]:hover{transform:translate(-50%,calc(-50% - 4px));filter:brightness(1)}
+#archive .photo-button::after{display:none}#archive .photo-button::before{content:attr(data-year);position:absolute;top:calc(100% + 7px);right:0;font:20px Arial,sans-serif;color:#c3d132;opacity:0}
+#archive .photo-button[aria-current="true"]::before{opacity:1}
+#archive-arc{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}
+#archive-arc-track{pointer-events:stroke;touch-action:none}
+#model-layer{z-index:1;pointer-events:none;background:transparent}
+#scene{pointer-events:none}
+#model-interaction{position:fixed;z-index:2;touch-action:none;cursor:grab;outline:0}
+#model-interaction.rotating{cursor:grabbing}
+#stage{z-index:2}
+#timeline{z-index:4}
+#timeline-scroll-zone{z-index:3}
+body.ending-mode #model-interaction{visibility:hidden;pointer-events:none}
+#archive .photo-button[aria-current="true"]::before{font-size:24px}

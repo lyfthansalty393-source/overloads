@@ -172,27 +172,27 @@ body.ending-mode #model-layer,body.ending-mode #stage,body.ending-mode #archive,
 
 /* Actual per-era font assets; paragraphs retain the readable body face. */
 @font-face{font-family:Era1910;src:url('./assets/fonts/Era1910Specimen.otf') format('opentype');font-weight:400;font-style:normal;font-display:swap}
-#specimen-glyph.era-1910,.era-event[data-year="1910"] h2{font-family:Era1910,serif;font-weight:400}
+#specimen-glyph.era-1910{font-family:Era1910,serif;font-weight:400}
 @font-face{font-family:Era1920;src:url('./assets/fonts/NanumMyeongjo-Regular.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap}
-#specimen-glyph.era-1920,.era-event[data-year="1920"] h2{font-family:Era1920,serif;font-weight:400}
+#specimen-glyph.era-1920{font-family:Era1920,serif;font-weight:400}
 @font-face{font-family:Era1930;src:url('./assets/fonts/NanumBrushScript-Regular.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap}
-#specimen-glyph.era-1930,.era-event[data-year="1930"] h2{font-family:Era1930,serif;font-weight:400}
+#specimen-glyph.era-1930{font-family:Era1930,serif;font-weight:400}
 @font-face{font-family:Era1950;src:url('./assets/fonts/NanumPenScript-Regular.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap}
-#specimen-glyph.era-1950,.era-event[data-year="1950"] h2{font-family:Era1950,serif;font-weight:400}
+#specimen-glyph.era-1950{font-family:Era1950,serif;font-weight:400}
 @font-face{font-family:Era1960;src:url('./assets/fonts/BMYEONSUNG_ttf.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap}
-#specimen-glyph.era-1960,.era-event[data-year="1960"] h2{font-family:Era1960,serif;font-weight:400}
+#specimen-glyph.era-1960{font-family:Era1960,serif;font-weight:400}
 @font-face{font-family:Era1970;src:url('./assets/fonts/BMHANNA_11yrs_ttf.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap}
-#specimen-glyph.era-1970,.era-event[data-year="1970"] h2{font-family:Era1970,serif;font-weight:400}
+#specimen-glyph.era-1970{font-family:Era1970,serif;font-weight:400}
 @font-face{font-family:Era1980;src:url('./assets/fonts/BMJUA_ttf.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap}
-#specimen-glyph.era-1980,.era-event[data-year="1980"] h2{font-family:Era1980,serif;font-weight:400}
+#specimen-glyph.era-1980{font-family:Era1980,serif;font-weight:400}
 @font-face{font-family:Era1990;src:url('./assets/fonts/BMDOHYEON_ttf.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap}
-#specimen-glyph.era-1990,.era-event[data-year="1990"] h2{font-family:Era1990,serif;font-weight:400}
+#specimen-glyph.era-1990{font-family:Era1990,serif;font-weight:400}
 @font-face{font-family:Era2000;src:url('./assets/fonts/BMHANNAAir_ttf.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap}
-#specimen-glyph.era-2000,.era-event[data-year="2000"] h2{font-family:Era2000,serif;font-weight:400}
+#specimen-glyph.era-2000{font-family:Era2000,serif;font-weight:400}
 @font-face{font-family:Era2010;src:url('./assets/fonts/BMEULJIROTTF.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap}
-#specimen-glyph.era-2010,.era-event[data-year="2010"] h2{font-family:Era2010,serif;font-weight:400}
+#specimen-glyph.era-2010{font-family:Era2010,serif;font-weight:400}
 @font-face{font-family:Era2020;src:url('./assets/fonts/BMEuljiro10yearslater.ttf') format('truetype');font-weight:400;font-style:normal;font-display:swap}
-#specimen-glyph.era-2020,.era-event[data-year="2020"] h2{font-family:Era2020,serif;font-weight:400}
+#specimen-glyph.era-2020{font-family:Era2020,serif;font-weight:400}
 
 #ending-question-panel{position:absolute;inset:0;z-index:4;display:flex;align-items:center;justify-content:center;flex-direction:column;padding:7vw;opacity:0;pointer-events:none;transition:opacity .65s ease}
 #ending-question{font-family:Pretendard,sans-serif;color:#fafafa;font-size:clamp(28px,2.4vw,44px);line-height:1.65;text-align:center;margin:0;word-break:keep-all;max-width:1100px}
@@ -209,11 +209,34 @@ body.ending-mode #model-layer,body.ending-mode #stage,body.ending-mode #archive,
 #ending-scene{touch-action:none}
 @media(max-width:700px){#ending-question{font-size:28px;line-height:1.6}#ending-question .question-lead{font-size:20px}#ending-question-panel{padding:24px}}
 
+/* Year typography stays unchanged; period fonts belong to the specimen only. */
+.era-event h2,.era-number,.era-suffix,#archive .era-label{font-family:Arial,"Noto Sans KR","Apple SD Gothic Neo","Malgun Gothic",sans-serif}
+#archive{position:fixed;inset:0;width:100vw;height:100dvh;min-height:0;padding:0;border:0;overflow:visible;z-index:0;pointer-events:none;background:transparent;touch-action:none}
+#archive .era-group{display:contents}#archive .era-label{display:none}
+#archive .photo-button{position:absolute;margin:0;padding:0;max-width:none;pointer-events:auto;touch-action:none;transform:translate(-50%,-50%);transition:filter .2s ease;filter:brightness(.75);z-index:1}
+#archive .photo-button img{display:block;width:100%!important;height:100%;object-fit:contain;max-width:none;user-select:none;pointer-events:none}
+#archive .photo-button.scroll-selected,#archive .photo-button[aria-current="true"]{transform:translate(-50%,-50%);filter:brightness(1);outline:1px solid #c3d132;outline-offset:4px}
+#archive .photo-button:hover,#archive .photo-button.scroll-selected:hover,#archive .photo-button[aria-current="true"]:hover{transform:translate(-50%,calc(-50% - 4px));filter:brightness(1)}
+#archive .photo-button::after{display:none}#archive .photo-button::before{content:attr(data-year);position:absolute;top:calc(100% + 7px);right:0;font:20px Arial,sans-serif;color:#c3d132;opacity:0}
+#archive .photo-button[aria-current="true"]::before{opacity:1}
+#archive-arc{position:absolute;inset:0;width:100%;height:100%;overflow:visible;pointer-events:none}
+#archive-arc-track{pointer-events:stroke;touch-action:none}
+#model-layer{z-index:1;pointer-events:none;background:transparent}
+#scene{pointer-events:none}
+#model-interaction{position:fixed;z-index:2;touch-action:none;cursor:grab;outline:0}
+#model-interaction.rotating{cursor:grabbing}
+#stage{z-index:2}
+#timeline{z-index:4}
+#timeline-scroll-zone{z-index:3}
+body.ending-mode #model-interaction{visibility:hidden;pointer-events:none}
+#archive .photo-button[aria-current="true"]::before{font-size:24px}
+
 </style>
 </head>
 <body>
   <div id="model-layer"><canvas id="scene" aria-label="360도 XYZ 회전 및 확대 가능한 5면 공간 모델"></canvas></div>
-  <nav id="archive" aria-label="연대순 사진"></nav>
+  <div id="model-interaction" aria-label="모델 회전과 확대 영역"></div>
+  <nav id="archive" aria-label="스크롤에 따라 오른쪽에서 왼쪽으로 이동하는 반원 사진 타임라인"><svg id="archive-arc" aria-hidden="true"><path id="archive-arc-track" fill="none" stroke="transparent" stroke-width="120"/></svg></nav>
   <main id="stage" aria-label="공간 사진">
     <div id="picture-frame">
       <img id="fallback" alt="" hidden>
@@ -4281,13 +4304,15 @@ const photoIndex=new Map(archive.photos.map((p,i)=>[p.id,i]));
 const frame = $('#picture-frame');
 const canvas = $('#scene');
 const modelLayer = $('#model-layer');
+const modelHit = $('#model-interaction');
+let lastArcPosition=NaN;
 const fallback = $('#fallback');
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(50, 1, .01, 1000);
 let renderer;
 try {
   renderer = new THREE.WebGLRenderer({canvas, antialias: true, alpha: true});
-  renderer.setClearColor(0x101010, 1);
+  renderer.setClearColor(0x101010, 0);
   renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
   renderer.outputColorSpace = THREE.SRGBColorSpace;
 } catch (error) {
@@ -4501,11 +4526,12 @@ function resize() {
   const width=Math.min(availableWidth,innerHeight*.66*aspect);
   frame.style.width=`${width}px`;frame.style.height=`${width/aspect}px`;
   if(renderer) {renderer.setSize(innerWidth,innerHeight,false);camera.aspect=innerWidth/innerHeight;}
-  const panelLeft=archiveNode.getBoundingClientRect().left;
-  const zoneLeft=Math.min(panelLeft,frame.getBoundingClientRect().right+12);
+  const panelLeft=$('#timeline').getBoundingClientRect().left;
+  const zoneLeft=Math.min(panelLeft,Math.max(frame.getBoundingClientRect().right+12,panelLeft-24));
   $('#timeline-scroll-zone').style.left=`${zoneLeft}px`;
   $('#timeline-scroll-zone').style.width=`${Math.max(0,panelLeft-zoneLeft)}px`;
   centerActiveEra('instant');
+  layoutPhotoArc(travel);
   dirty=true;
 }
 addEventListener('resize',resize);
@@ -4589,7 +4615,7 @@ for(const era of archive.eras) {
     // A single uniform scale per thumbnail; portrait and landscape ratios stay original.
     const scale=Math.min(1,180/Math.max(photo.width,photo.height));
     img.style.width=`${photo.width*scale}px`;
-    button.append(img);button.addEventListener('click',()=>{clearTimeout(archiveIdle);archiveHasGesture=false;archiveSnap=false;navigateTo(photoIndex.get(photo.id));});
+    button.append(img);button.addEventListener('click',()=>navigateTo(photoIndex.get(photo.id)));button.dataset.year=`${photo.year}s`;
     buttons.set(photo.id,button);section.append(button);
   }
   $('#archive').append(section);
@@ -4603,42 +4629,57 @@ for(const era of archive.eras) {
   item.append(heading,material,policy);$('#eras').append(item);
 }
 
-// Two independent input regions: archive scroll selects, model wheel zooms.
-let archiveIdle, archiveSnap=false, archiveHasGesture=false;
-function navigateTo(index, immediate=false) {
+// An upper semicircular conveyor, not a complete circular orbit. Photos enter
+// beside the right rule, pass behind the real model canvas, and leave at left.
+let arcIdle;
+function navigateTo(index,immediate=false){
   targetTravel=clamp(index,0,archive.photos.length-1);
   if(immediate||reduced){travel=targetTravel;travelVelocity=0;}
   selectPhoto(archive.photos[Math.round(targetTravel)]);
-  dirty=true;
+  layoutPhotoArc(travel);dirty=true;
 }
 function onScroll(){dirty=true;}
-function nearestArchivePhoto(){
-  const marker=archiveNode.getBoundingClientRect().top+archiveNode.clientHeight*.42;
-  let best=archive.photos[0],distance=Infinity;
-  for(const photo of archive.photos){const r=buttons.get(photo.id).getBoundingClientRect();const d=Math.abs((r.top+r.bottom)/2-marker);if(d<distance){distance=d;best=photo;}}
-  return best;
+function arcGeometry(){
+  const right=$('#timeline').getBoundingClientRect().left;
+  const thumb=innerWidth<=700?62:120;
+  const start=right-thumb/2,end=thumb/2;
+  return {cx:(start+end)/2,rx:Math.max(20,(start-end)/2),base:innerHeight*.70,ry:innerHeight*.40,thumb};
 }
-archiveNode.addEventListener('wheel',()=>{archiveHasGesture=true;archiveSnap=false;},{passive:true});
-archiveNode.addEventListener('touchstart',()=>{archiveHasGesture=true;archiveSnap=false;},{passive:true});
+function pointOnArc(u,g){return {x:g.cx+g.rx*Math.cos(Math.PI*u),y:g.base-g.ry*Math.sin(Math.PI*u)};}
+function layoutPhotoArc(position){
+  if(!buttons.size)return;
+  const g=arcGeometry(),span=innerWidth<=700?6:8,anchor=.82;
+  const svg=$('#archive-arc');svg.setAttribute('viewBox',`0 0 ${innerWidth} ${innerHeight}`);
+  $('#archive-arc-track').setAttribute('d',Array.from({length:49},(_,i)=>{const p=pointOnArc(i/48,g);return `${i?'L':'M'}${p.x},${p.y}`;}).join(' '));
+  for(let i=0;i<archive.photos.length;i++){
+    const p=archive.photos[i],button=buttons.get(p.id),u=anchor+(position-i)/span;
+    const visible=u>=0&&u<=1;button.hidden=!visible;
+    if(!visible)continue;
+    const pt=pointOnArc(u,g),scale=Math.min(g.thumb/p.width,(innerWidth<=700?52:90)/p.height);
+    button.style.left=`${pt.x}px`;button.style.top=`${pt.y}px`;
+    button.style.width=`${p.width*scale}px`;button.style.height=`${p.height*scale}px`;
+    button.dataset.arcU=u;button.dataset.arcIndex=i;
+  }
+  lastArcPosition=position;
+}
+function scrollPhotoArc(delta){
+  targetTravel=clamp(targetTravel+delta*.006,0,archive.photos.length-1);
+  const photo=archive.photos[Math.round(targetTravel)];
+  if(photo.id!==current?.id)selectPhoto(photo);
+  clearTimeout(arcIdle);arcIdle=setTimeout(()=>{targetTravel=Math.round(targetTravel);dirty=true;},180);
+  dirty=true;
+}
+archiveNode.addEventListener('wheel',e=>{e.preventDefault();e.stopPropagation();scrollPhotoArc(e.deltaY*(e.deltaMode===1?16:e.deltaMode===2?innerHeight:1));},{passive:false});
+let arcTouchY;
+archiveNode.addEventListener('touchstart',e=>arcTouchY=e.touches[0].clientY,{passive:true});
+archiveNode.addEventListener('touchmove',e=>{if(arcTouchY==null)return;e.preventDefault();e.stopPropagation();const y=e.touches[0].clientY;scrollPhotoArc(arcTouchY-y);arcTouchY=y;},{passive:false});
+archiveNode.addEventListener('touchend',()=>arcTouchY=null);
+archiveNode.addEventListener('touchcancel',()=>arcTouchY=null);
 
-archiveNode.addEventListener('scroll',()=>{
-  if(!archiveHasGesture||archiveSnap)return;
-  const photo=nearestArchivePhoto();
-  navigateTo(photoIndex.get(photo.id),true);
-  clearTimeout(archiveIdle);
-  archiveIdle=setTimeout(()=>{
-    const button=buttons.get(photo.id);
-    const r=button.getBoundingClientRect(),nav=archiveNode.getBoundingClientRect();
-    const target=archiveNode.scrollTop+r.top-nav.top+r.height/2-archiveNode.clientHeight*.42;
-    archiveSnap=true;
-    archiveNode.scrollTo({top:Math.max(0,target),behavior:reduced?'instant':'smooth'});
-    setTimeout(()=>{archiveSnap=false;archiveHasGesture=false;},500);
-  },180);
-},{passive:true});
 // No artistic zoom bounds: only reject non-finite floating-point results.
 function finiteScale(value,factor){const next=value*factor;return Number.isFinite(next)&&next>0?next:value;}
 function zoomModel(delta){targetModelZoom=finiteScale(targetModelZoom,Math.exp(-delta*.003));dirty=true;}
-modelLayer.addEventListener('wheel',e=>{
+modelHit.addEventListener('wheel',e=>{
   e.preventDefault();e.stopPropagation();
   if(debug||dialog.open)return;
   const unit=e.deltaMode===1?16:e.deltaMode===2?innerHeight:1;
@@ -4658,12 +4699,7 @@ function moveStructure(delta){
     const direction=Math.sign(structureDelta);structureDelta-=direction*110;
     navigateTo(Math.round(targetTravel)+direction,true);moved=true;
   }
-  if(moved){
-    clearTimeout(archiveIdle);archiveHasGesture=false;archiveSnap=true;
-    const button=buttons.get(current.id),r=button.getBoundingClientRect(),nav=archiveNode.getBoundingClientRect();
-    archiveNode.scrollTo({top:Math.max(0,archiveNode.scrollTop+r.top-nav.top+r.height/2-archiveNode.clientHeight*.42),behavior:reduced?'instant':'smooth'});
-    setTimeout(()=>archiveSnap=false,500);
-  }
+  if(moved)layoutPhotoArc(travel);
 }
 $('#timeline-bottom-scroll').addEventListener('wheel',e=>{
   e.preventDefault();e.stopPropagation();
@@ -4701,10 +4737,10 @@ function beginModelDrag(x,y,roll=false){
   activeModelDrag={x,y,lastX:x,lastY:y,roll,distance:0,surface,
     startPitch:rotationX,startYaw:rotationY,startRoll:rotationZ};
 }
-modelLayer.addEventListener('contextmenu',e=>e.preventDefault());
-modelLayer.addEventListener('pointerdown',e=>{
+modelHit.addEventListener('contextmenu',e=>e.preventDefault());
+modelHit.addEventListener('pointerdown',e=>{
   if(debug||![0,2].includes(e.button))return;
-  modelLayer.setPointerCapture(e.pointerId);
+  modelHit.setPointerCapture(e.pointerId);
   if(!modelPointers.size)modelDragged=false;
   modelPointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
   beginModelDrag(e.clientX,e.clientY,e.button===2||e.shiftKey);
@@ -4713,9 +4749,9 @@ modelLayer.addEventListener('pointerdown',e=>{
     targetModelZoom=modelZoom;
     modelPinch={distance:Math.hypot(a.x-b.x,a.y-b.y),angle:Math.atan2(b.y-a.y,b.x-a.x),zoom:modelZoom};
   }
-  modelLayer.classList.add('rotating');
+  modelHit.classList.add('rotating');
 });
-modelLayer.addEventListener('pointermove',e=>{
+modelHit.addEventListener('pointermove',e=>{
   if(debug||!modelPointers.has(e.pointerId))return;
   modelPointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
   if(modelPointers.size===2&&modelPinch){
@@ -4745,9 +4781,9 @@ function releaseModel(e){
   modelPointers.delete(e.pointerId);modelPinch=null;activeModelDrag=null;
   modelRig.quaternion.copy(targetModelRotation);dirty=true;
   if(modelPointers.size===1){const p=[...modelPointers.values()][0];beginModelDrag(p.x,p.y);}
-  else modelLayer.classList.remove('rotating');
+  else modelHit.classList.remove('rotating');
 }
-modelLayer.addEventListener('pointerup',releaseModel);modelLayer.addEventListener('pointercancel',releaseModel);
+modelHit.addEventListener('pointerup',releaseModel);modelHit.addEventListener('pointercancel',releaseModel);
 addEventListener('keydown',e=>{
   if(dialog.open||debug||e.target.closest('select, input, textarea'))return;
   if(['ArrowDown','PageDown','ArrowRight','ArrowUp','PageUp','ArrowLeft','Home','End'].includes(e.key)){
@@ -4772,10 +4808,10 @@ surface.addEventListener('pointermove',e=>{const old=pointers.get(e.pointerId);i
 function release(e){pointers.delete(e.pointerId);pinch=null;surface.classList.remove('dragging');}
 surface.addEventListener('pointerup',release);surface.addEventListener('pointercancel',release);
 surface.addEventListener('click',()=>{if(dragged)return;zoom=zoom===1?2:1;panX=panY=0;paintZoom();});
-modelLayer.addEventListener('click',()=>{if(!debug&&current&&!current.spatial&&!modelDragged)openPhoto(current);});
-modelLayer.addEventListener('dblclick',()=>{if(!debug&&current&&!modelDragged)openPhoto(current);});
-modelLayer.tabIndex=0;modelLayer.setAttribute('role','group');modelLayer.setAttribute('aria-label','5면 공간 모델: 드래그 XY 회전, Shift 또는 오른쪽 드래그 Z 회전, 휠 확대·축소, Enter 원본 확대');
-modelLayer.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();if(current)openPhoto(current);}});
+modelHit.addEventListener('click',()=>{if(!debug&&current&&!current.spatial&&!modelDragged)openPhoto(current);});
+modelHit.addEventListener('dblclick',()=>{if(!debug&&current&&!modelDragged)openPhoto(current);});
+modelHit.tabIndex=0;modelHit.setAttribute('role','group');modelHit.setAttribute('aria-label','5면 공간 모델: 드래그 XY 회전, Shift 또는 오른쪽 드래그 Z 회전, 휠 확대·축소, Enter 원본 확대');
+modelHit.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();if(current)openPhoto(current);}});
 
 function render(time=0) {
   if(disposed)return;
@@ -4785,6 +4821,7 @@ function render(time=0) {
   travelVelocity+=(displacement*110-travelVelocity*20)*dt;
   travel+=travelVelocity*dt;
   if(Math.abs(displacement)<.0001&&Math.abs(travelVelocity)<.001){travel=targetTravel;travelVelocity=0;}
+  if(!Number.isFinite(lastArcPosition)||Math.abs(travel-lastArcPosition)>.0001)layoutPhotoArc(travel);
   const damping=1-Math.exp(-dt*6);
   entrance+=(1-entrance)*(reduced?1:damping);
   if(current?.kind==='ending')return;
@@ -4822,6 +4859,18 @@ function render(time=0) {
   camera.projectionMatrix.elements[9]=2*(screenFrame.top+screenFrame.height/2)/innerHeight-1;
   camera.projectionMatrixInverse.copy(camera.projectionMatrix).invert();
   renderer.render(scene,camera);
+  // CSS thumbnails are behind the WebGL model. Project its real geometry to
+  // bound input as well, so visible photos beside it can still be selected.
+  const bounds=new THREE.Box3().setFromObject(modelRig);
+  let x0=Infinity,y0=Infinity,x1=-Infinity,y1=-Infinity;
+  for(const x of [bounds.min.x,bounds.max.x])for(const y of [bounds.min.y,bounds.max.y])for(const z of [bounds.min.z,bounds.max.z]){
+    const v=new THREE.Vector3(x,y,z).project(camera),sx=(v.x+1)*innerWidth/2,sy=(1-v.y)*innerHeight/2;
+    x0=Math.min(x0,sx);x1=Math.max(x1,sx);y0=Math.min(y0,sy);y1=Math.max(y1,sy);
+  }
+  modelHit.hidden=debug;
+  modelHit.style.left=`${clamp(x0,0,innerWidth)}px`;modelHit.style.top=`${clamp(y0,0,innerHeight)}px`;
+  modelHit.style.width=`${Math.max(0,Math.min(innerWidth,x1)-Math.max(0,x0))}px`;
+  modelHit.style.height=`${Math.max(0,Math.min(innerHeight,y1)-Math.max(0,y0))}px`;
   window.__signArchive={id:current.id,faces:room.children.map(m=>m.name),depth:derived?.depth??0,
     cubeSide:derived?.side??0,cameraZ:camera.position.z,entrance,travel,targetTravel,modelZoom,outlineCount:outlineGroup.children.length,
     yawDegrees:THREE.MathUtils.radToDeg(yaw),pitchDegrees:THREE.MathUtils.radToDeg(pitch),

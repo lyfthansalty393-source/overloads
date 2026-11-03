@@ -26,13 +26,15 @@ const photoIndex=new Map(archive.photos.map((p,i)=>[p.id,i]));
 const frame = $('#picture-frame');
 const canvas = $('#scene');
 const modelLayer = $('#model-layer');
+const modelHit = $('#model-interaction');
+let lastArcPosition=NaN;
 const fallback = $('#fallback');
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(50, 1, .01, 1000);
 let renderer;
 try {
   renderer = new THREE.WebGLRenderer({canvas, antialias: true, alpha: true});
-  renderer.setClearColor(0x101010, 1);
+  renderer.setClearColor(0x101010, 0);
   renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
   renderer.outputColorSpace = THREE.SRGBColorSpace;
 } catch (error) {
@@ -246,11 +248,12 @@ function resize() {
   const width=Math.min(availableWidth,innerHeight*.66*aspect);
   frame.style.width=`${width}px`;frame.style.height=`${width/aspect}px`;
   if(renderer) {renderer.setSize(innerWidth,innerHeight,false);camera.aspect=innerWidth/innerHeight;}
-  const panelLeft=archiveNode.getBoundingClientRect().left;
-  const zoneLeft=Math.min(panelLeft,frame.getBoundingClientRect().right+12);
+  const panelLeft=$('#timeline').getBoundingClientRect().left;
+  const zoneLeft=Math.min(panelLeft,Math.max(frame.getBoundingClientRect().right+12,panelLeft-24));
   $('#timeline-scroll-zone').style.left=`${zoneLeft}px`;
   $('#timeline-scroll-zone').style.width=`${Math.max(0,panelLeft-zoneLeft)}px`;
   centerActiveEra('instant');
+  layoutPhotoArc(travel);
   dirty=true;
 }
 addEventListener('resize',resize);
@@ -334,7 +337,7 @@ for(const era of archive.eras) {
     // A single uniform scale per thumbnail; portrait and landscape ratios stay original.
     const scale=Math.min(1,180/Math.max(photo.width,photo.height));
     img.style.width=`${photo.width*scale}px`;
-    button.append(img);button.addEventListener('click',()=>{clearTimeout(archiveIdle);archiveHasGesture=false;archiveSnap=false;navigateTo(photoIndex.get(photo.id));});
+    button.append(img);button.addEventListener('click',()=>navigateTo(photoIndex.get(photo.id)));button.dataset.year=`${photo.year}s`;
     buttons.set(photo.id,button);section.append(button);
   }
   $('#archive').append(section);
@@ -348,42 +351,57 @@ for(const era of archive.eras) {
   item.append(heading,material,policy);$('#eras').append(item);
 }
 
-// Two independent input regions: archive scroll selects, model wheel zooms.
-let archiveIdle, archiveSnap=false, archiveHasGesture=false;
-function navigateTo(index, immediate=false) {
+// An upper semicircular conveyor, not a complete circular orbit. Photos enter
+// beside the right rule, pass behind the real model canvas, and leave at left.
+let arcIdle;
+function navigateTo(index,immediate=false){
   targetTravel=clamp(index,0,archive.photos.length-1);
   if(immediate||reduced){travel=targetTravel;travelVelocity=0;}
   selectPhoto(archive.photos[Math.round(targetTravel)]);
-  dirty=true;
+  layoutPhotoArc(travel);dirty=true;
 }
 function onScroll(){dirty=true;}
-function nearestArchivePhoto(){
-  const marker=archiveNode.getBoundingClientRect().top+archiveNode.clientHeight*.42;
-  let best=archive.photos[0],distance=Infinity;
-  for(const photo of archive.photos){const r=buttons.get(photo.id).getBoundingClientRect();const d=Math.abs((r.top+r.bottom)/2-marker);if(d<distance){distance=d;best=photo;}}
-  return best;
+function arcGeometry(){
+  const right=$('#timeline').getBoundingClientRect().left;
+  const thumb=innerWidth<=700?62:120;
+  const start=right-thumb/2,end=thumb/2;
+  return {cx:(start+end)/2,rx:Math.max(20,(start-end)/2),base:innerHeight*.70,ry:innerHeight*.40,thumb};
 }
-archiveNode.addEventListener('wheel',()=>{archiveHasGesture=true;archiveSnap=false;},{passive:true});
-archiveNode.addEventListener('touchstart',()=>{archiveHasGesture=true;archiveSnap=false;},{passive:true});
+function pointOnArc(u,g){return {x:g.cx+g.rx*Math.cos(Math.PI*u),y:g.base-g.ry*Math.sin(Math.PI*u)};}
+function layoutPhotoArc(position){
+  if(!buttons.size)return;
+  const g=arcGeometry(),span=innerWidth<=700?6:8,anchor=.82;
+  const svg=$('#archive-arc');svg.setAttribute('viewBox',`0 0 ${innerWidth} ${innerHeight}`);
+  $('#archive-arc-track').setAttribute('d',Array.from({length:49},(_,i)=>{const p=pointOnArc(i/48,g);return `${i?'L':'M'}${p.x},${p.y}`;}).join(' '));
+  for(let i=0;i<archive.photos.length;i++){
+    const p=archive.photos[i],button=buttons.get(p.id),u=anchor+(position-i)/span;
+    const visible=u>=0&&u<=1;button.hidden=!visible;
+    if(!visible)continue;
+    const pt=pointOnArc(u,g),scale=Math.min(g.thumb/p.width,(innerWidth<=700?52:90)/p.height);
+    button.style.left=`${pt.x}px`;button.style.top=`${pt.y}px`;
+    button.style.width=`${p.width*scale}px`;button.style.height=`${p.height*scale}px`;
+    button.dataset.arcU=u;button.dataset.arcIndex=i;
+  }
+  lastArcPosition=position;
+}
+function scrollPhotoArc(delta){
+  targetTravel=clamp(targetTravel+delta*.006,0,archive.photos.length-1);
+  const photo=archive.photos[Math.round(targetTravel)];
+  if(photo.id!==current?.id)selectPhoto(photo);
+  clearTimeout(arcIdle);arcIdle=setTimeout(()=>{targetTravel=Math.round(targetTravel);dirty=true;},180);
+  dirty=true;
+}
+archiveNode.addEventListener('wheel',e=>{e.preventDefault();e.stopPropagation();scrollPhotoArc(e.deltaY*(e.deltaMode===1?16:e.deltaMode===2?innerHeight:1));},{passive:false});
+let arcTouchY;
+archiveNode.addEventListener('touchstart',e=>arcTouchY=e.touches[0].clientY,{passive:true});
+archiveNode.addEventListener('touchmove',e=>{if(arcTouchY==null)return;e.preventDefault();e.stopPropagation();const y=e.touches[0].clientY;scrollPhotoArc(arcTouchY-y);arcTouchY=y;},{passive:false});
+archiveNode.addEventListener('touchend',()=>arcTouchY=null);
+archiveNode.addEventListener('touchcancel',()=>arcTouchY=null);
 
-archiveNode.addEventListener('scroll',()=>{
-  if(!archiveHasGesture||archiveSnap)return;
-  const photo=nearestArchivePhoto();
-  navigateTo(photoIndex.get(photo.id),true);
-  clearTimeout(archiveIdle);
-  archiveIdle=setTimeout(()=>{
-    const button=buttons.get(photo.id);
-    const r=button.getBoundingClientRect(),nav=archiveNode.getBoundingClientRect();
-    const target=archiveNode.scrollTop+r.top-nav.top+r.height/2-archiveNode.clientHeight*.42;
-    archiveSnap=true;
-    archiveNode.scrollTo({top:Math.max(0,target),behavior:reduced?'instant':'smooth'});
-    setTimeout(()=>{archiveSnap=false;archiveHasGesture=false;},500);
-  },180);
-},{passive:true});
 // No artistic zoom bounds: only reject non-finite floating-point results.
 function finiteScale(value,factor){const next=value*factor;return Number.isFinite(next)&&next>0?next:value;}
 function zoomModel(delta){targetModelZoom=finiteScale(targetModelZoom,Math.exp(-delta*.003));dirty=true;}
-modelLayer.addEventListener('wheel',e=>{
+modelHit.addEventListener('wheel',e=>{
   e.preventDefault();e.stopPropagation();
   if(debug||dialog.open)return;
   const unit=e.deltaMode===1?16:e.deltaMode===2?innerHeight:1;
@@ -403,12 +421,7 @@ function moveStructure(delta){
     const direction=Math.sign(structureDelta);structureDelta-=direction*110;
     navigateTo(Math.round(targetTravel)+direction,true);moved=true;
   }
-  if(moved){
-    clearTimeout(archiveIdle);archiveHasGesture=false;archiveSnap=true;
-    const button=buttons.get(current.id),r=button.getBoundingClientRect(),nav=archiveNode.getBoundingClientRect();
-    archiveNode.scrollTo({top:Math.max(0,archiveNode.scrollTop+r.top-nav.top+r.height/2-archiveNode.clientHeight*.42),behavior:reduced?'instant':'smooth'});
-    setTimeout(()=>archiveSnap=false,500);
-  }
+  if(moved)layoutPhotoArc(travel);
 }
 $('#timeline-bottom-scroll').addEventListener('wheel',e=>{
   e.preventDefault();e.stopPropagation();
@@ -446,10 +459,10 @@ function beginModelDrag(x,y,roll=false){
   activeModelDrag={x,y,lastX:x,lastY:y,roll,distance:0,surface,
     startPitch:rotationX,startYaw:rotationY,startRoll:rotationZ};
 }
-modelLayer.addEventListener('contextmenu',e=>e.preventDefault());
-modelLayer.addEventListener('pointerdown',e=>{
+modelHit.addEventListener('contextmenu',e=>e.preventDefault());
+modelHit.addEventListener('pointerdown',e=>{
   if(debug||![0,2].includes(e.button))return;
-  modelLayer.setPointerCapture(e.pointerId);
+  modelHit.setPointerCapture(e.pointerId);
   if(!modelPointers.size)modelDragged=false;
   modelPointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
   beginModelDrag(e.clientX,e.clientY,e.button===2||e.shiftKey);
@@ -458,9 +471,9 @@ modelLayer.addEventListener('pointerdown',e=>{
     targetModelZoom=modelZoom;
     modelPinch={distance:Math.hypot(a.x-b.x,a.y-b.y),angle:Math.atan2(b.y-a.y,b.x-a.x),zoom:modelZoom};
   }
-  modelLayer.classList.add('rotating');
+  modelHit.classList.add('rotating');
 });
-modelLayer.addEventListener('pointermove',e=>{
+modelHit.addEventListener('pointermove',e=>{
   if(debug||!modelPointers.has(e.pointerId))return;
   modelPointers.set(e.pointerId,{x:e.clientX,y:e.clientY});
   if(modelPointers.size===2&&modelPinch){
@@ -490,9 +503,9 @@ function releaseModel(e){
   modelPointers.delete(e.pointerId);modelPinch=null;activeModelDrag=null;
   modelRig.quaternion.copy(targetModelRotation);dirty=true;
   if(modelPointers.size===1){const p=[...modelPointers.values()][0];beginModelDrag(p.x,p.y);}
-  else modelLayer.classList.remove('rotating');
+  else modelHit.classList.remove('rotating');
 }
-modelLayer.addEventListener('pointerup',releaseModel);modelLayer.addEventListener('pointercancel',releaseModel);
+modelHit.addEventListener('pointerup',releaseModel);modelHit.addEventListener('pointercancel',releaseModel);
 addEventListener('keydown',e=>{
   if(dialog.open||debug||e.target.closest('select, input, textarea'))return;
   if(['ArrowDown','PageDown','ArrowRight','ArrowUp','PageUp','ArrowLeft','Home','End'].includes(e.key)){
@@ -517,10 +530,10 @@ surface.addEventListener('pointermove',e=>{const old=pointers.get(e.pointerId);i
 function release(e){pointers.delete(e.pointerId);pinch=null;surface.classList.remove('dragging');}
 surface.addEventListener('pointerup',release);surface.addEventListener('pointercancel',release);
 surface.addEventListener('click',()=>{if(dragged)return;zoom=zoom===1?2:1;panX=panY=0;paintZoom();});
-modelLayer.addEventListener('click',()=>{if(!debug&&current&&!current.spatial&&!modelDragged)openPhoto(current);});
-modelLayer.addEventListener('dblclick',()=>{if(!debug&&current&&!modelDragged)openPhoto(current);});
-modelLayer.tabIndex=0;modelLayer.setAttribute('role','group');modelLayer.setAttribute('aria-label','5면 공간 모델: 드래그 XY 회전, Shift 또는 오른쪽 드래그 Z 회전, 휠 확대·축소, Enter 원본 확대');
-modelLayer.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();if(current)openPhoto(current);}});
+modelHit.addEventListener('click',()=>{if(!debug&&current&&!current.spatial&&!modelDragged)openPhoto(current);});
+modelHit.addEventListener('dblclick',()=>{if(!debug&&current&&!modelDragged)openPhoto(current);});
+modelHit.tabIndex=0;modelHit.setAttribute('role','group');modelHit.setAttribute('aria-label','5면 공간 모델: 드래그 XY 회전, Shift 또는 오른쪽 드래그 Z 회전, 휠 확대·축소, Enter 원본 확대');
+modelHit.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();if(current)openPhoto(current);}});
 
 function render(time=0) {
   if(disposed)return;
@@ -530,6 +543,7 @@ function render(time=0) {
   travelVelocity+=(displacement*110-travelVelocity*20)*dt;
   travel+=travelVelocity*dt;
   if(Math.abs(displacement)<.0001&&Math.abs(travelVelocity)<.001){travel=targetTravel;travelVelocity=0;}
+  if(!Number.isFinite(lastArcPosition)||Math.abs(travel-lastArcPosition)>.0001)layoutPhotoArc(travel);
   const damping=1-Math.exp(-dt*6);
   entrance+=(1-entrance)*(reduced?1:damping);
   if(current?.kind==='ending')return;
@@ -567,6 +581,18 @@ function render(time=0) {
   camera.projectionMatrix.elements[9]=2*(screenFrame.top+screenFrame.height/2)/innerHeight-1;
   camera.projectionMatrixInverse.copy(camera.projectionMatrix).invert();
   renderer.render(scene,camera);
+  // CSS thumbnails are behind the WebGL model. Project its real geometry to
+  // bound input as well, so visible photos beside it can still be selected.
+  const bounds=new THREE.Box3().setFromObject(modelRig);
+  let x0=Infinity,y0=Infinity,x1=-Infinity,y1=-Infinity;
+  for(const x of [bounds.min.x,bounds.max.x])for(const y of [bounds.min.y,bounds.max.y])for(const z of [bounds.min.z,bounds.max.z]){
+    const v=new THREE.Vector3(x,y,z).project(camera),sx=(v.x+1)*innerWidth/2,sy=(1-v.y)*innerHeight/2;
+    x0=Math.min(x0,sx);x1=Math.max(x1,sx);y0=Math.min(y0,sy);y1=Math.max(y1,sy);
+  }
+  modelHit.hidden=debug;
+  modelHit.style.left=`${clamp(x0,0,innerWidth)}px`;modelHit.style.top=`${clamp(y0,0,innerHeight)}px`;
+  modelHit.style.width=`${Math.max(0,Math.min(innerWidth,x1)-Math.max(0,x0))}px`;
+  modelHit.style.height=`${Math.max(0,Math.min(innerHeight,y1)-Math.max(0,y0))}px`;
   window.__signArchive={id:current.id,faces:room.children.map(m=>m.name),depth:derived?.depth??0,
     cubeSide:derived?.side??0,cameraZ:camera.position.z,entrance,travel,targetTravel,modelZoom,outlineCount:outlineGroup.children.length,
     yawDegrees:THREE.MathUtils.radToDeg(yaw),pitchDegrees:THREE.MathUtils.radToDeg(pitch),

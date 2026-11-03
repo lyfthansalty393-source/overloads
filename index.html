@@ -10,7 +10,8 @@
 </head>
 <body>
   <div id="model-layer"><canvas id="scene" aria-label="360도 XYZ 회전 및 확대 가능한 5면 공간 모델"></canvas></div>
-  <nav id="archive" aria-label="연대순 사진"></nav>
+  <div id="model-interaction" aria-label="모델 회전과 확대 영역"></div>
+  <nav id="archive" aria-label="스크롤에 따라 오른쪽에서 왼쪽으로 이동하는 반원 사진 타임라인"><svg id="archive-arc" aria-hidden="true"><path id="archive-arc-track" fill="none" stroke="transparent" stroke-width="120"/></svg></nav>
   <main id="stage" aria-label="공간 사진">
     <div id="picture-frame">
       <img id="fallback" alt="" hidden>
