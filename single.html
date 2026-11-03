@@ -87,6 +87,31 @@ html,body{height:100%;overflow:hidden;overscroll-behavior:none}
 #caption{background:#101010;border-left:2px solid #560e45;padding:14px 18px}
 #timeline-scroll-zone{touch-action:none}
 
+/* Compact unboxed chronology, with a separate lower scroll surface. */
+#era-scroll{flex:0 1 auto;height:min(46dvh,550px);min-height:140px;padding-bottom:55vh}
+#timeline-bottom-scroll{flex:1;min-height:64px;border-top:1px solid rgb(86 14 69 / .6);background:transparent;cursor:ns-resize;touch-action:none}
+.era-event{opacity:.25;transition:opacity .25s ease;padding-bottom:32px}
+.era-event.active{opacity:1}
+.era-event .material-change{background:transparent;border:0;padding:0;color:#c3d132;margin-bottom:18px}
+.era-event:not(.active) h2{opacity:1}
+.era-event h2{display:flex;align-items:baseline;gap:3px;line-height:1.15;margin-bottom:20px;font-weight:400}
+.era-number{font-size:38px;font-variant-numeric:tabular-nums;letter-spacing:-1.2px}
+.era-suffix{font-size:23px}
+.era-event.active .era-number{font-size:62px;font-weight:600;letter-spacing:-2px}
+.era-event.active .era-suffix{font-size:28px}
+.era-event.active::before{top:25px}
+#archive .era-group .era-label{opacity:.35}
+#archive .era-group.active-era .era-label{opacity:1;color:#c3d132;font-size:clamp(20px,1.5vw,30px)}
+@media(max-width:700px){
+ #era-scroll{height:44dvh;min-height:130px}
+ .era-number{font-size:24px}.era-suffix{font-size:14px}
+ .era-event.active .era-number{font-size:36px;letter-spacing:-1px}.era-event.active .era-suffix{font-size:17px}
+ .era-event.active::before{top:14px}
+ #archive .era-group.active-era .era-label{font-size:17px}
+}
+#era-scroll{padding-bottom:20px}
+#eras{padding-bottom:55vh}
+
 </style>
 </head>
 <body>
@@ -106,6 +131,7 @@ html,body{height:100%;overflow:hidden;overscroll-behavior:none}
       <div id="specimen-info"><p id="specimen-material"></p><p id="specimen-type"></p><div id="specimen-colors" aria-label="시대별 대표 색채"></div></div>
     </header>
     <div id="era-scroll"><div id="eras"></div></div>
+    <div id="timeline-bottom-scroll" aria-label="연표 전체 스크롤 영역" title="연표 전체 스크롤"></div>
   </aside>
   <dialog id="enlarged" aria-label="확대한 사진">
     <button id="back" type="button" aria-label="돌아가기"><span aria-hidden="true">-</span><span>돌아가기</span></button>
@@ -4196,6 +4222,7 @@ function updateTimeline(year) {
   for(const el of $('#eras').children) {
     const yes=Number(el.dataset.year)===year;el.classList.toggle('active',yes);if(yes)active=el;
   }
+  for(const group of archiveNode.querySelectorAll('.era-group'))group.classList.toggle('active-era',Number(group.dataset.year)===year);
   const era=archive.eras.find(e=>e.year===year),specimen=era.specimen;
   $('#specimen-glyph').className=specimen.fontClass;
   $('#specimen-material').textContent=specimen.material;
@@ -4206,7 +4233,7 @@ function updateTimeline(year) {
     swatch.title=`${color.label} ${color.hex}`;swatch.setAttribute('aria-label',swatch.title);
     $('#specimen-colors').append(swatch);
   }
-  if(active)$('#era-scroll').scrollTo({top:active.offsetTop,behavior:reduced?'instant':'smooth'});
+  if(active){const view=$('#era-scroll');view.scrollTo({top:Math.max(0,active.offsetTop-view.clientHeight*.42),behavior:reduced?'instant':'smooth'});}
 }
 
 for(const era of archive.eras) {
@@ -4225,7 +4252,9 @@ for(const era of archive.eras) {
   }
   $('#archive').append(section);
   const item=document.createElement('section');item.className='era-event';item.dataset.year=era.year;
-  const heading=document.createElement('h2');heading.textContent=`${era.year}s`;
+  const heading=document.createElement('h2');
+  const number=document.createElement('span');number.className='era-number';number.textContent=era.year;
+  const suffix=document.createElement('span');suffix.className='era-suffix';suffix.textContent='s';heading.append(number,suffix);
   const policy=document.createElement('p');policy.textContent=era.policy;
   const material=document.createElement('p');material.className='material-change';
   material.setAttribute('aria-label','재질·기술·표현의 변화');material.textContent=era.materialChange;
@@ -4280,13 +4309,16 @@ function scrollRightTimeline(e){
 }
 $('#timeline').addEventListener('wheel',scrollRightTimeline,{passive:false});
 $('#timeline-scroll-zone').addEventListener('wheel',scrollRightTimeline,{passive:false});
-let boundaryTouchY;
-$('#timeline-scroll-zone').addEventListener('touchstart',e=>{boundaryTouchY=e.touches[0].clientY;},{passive:true});
-$('#timeline-scroll-zone').addEventListener('touchmove',e=>{
-  if(boundaryTouchY==null)return;e.preventDefault();e.stopPropagation();
-  const y=e.touches[0].clientY;$('#era-scroll').scrollTop+=boundaryTouchY-y;boundaryTouchY=y;
-},{passive:false});
-$('#timeline-scroll-zone').addEventListener('touchend',()=>boundaryTouchY=null);
+for(const zone of [$('#timeline-scroll-zone'),$('#timeline-bottom-scroll')]){
+  let touchY;
+  zone.addEventListener('touchstart',e=>{touchY=e.touches[0].clientY;},{passive:true});
+  zone.addEventListener('touchmove',e=>{
+    if(touchY==null)return;e.preventDefault();e.stopPropagation();
+    const y=e.touches[0].clientY;$('#era-scroll').scrollTop+=touchY-y;touchY=y;
+  },{passive:false});
+  zone.addEventListener('touchend',()=>touchY=null);
+  zone.addEventListener('touchcancel',()=>touchY=null);
+}
 const axes={x:new THREE.Vector3(1,0,0),y:new THREE.Vector3(0,1,0),z:new THREE.Vector3(0,0,1)};
 function rotateModel(x,y,z){
   // Quaternion increments avoid pole limits and Euler gimbal lock.

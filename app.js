@@ -288,6 +288,7 @@ function updateTimeline(year) {
   for(const el of $('#eras').children) {
     const yes=Number(el.dataset.year)===year;el.classList.toggle('active',yes);if(yes)active=el;
   }
+  for(const group of archiveNode.querySelectorAll('.era-group'))group.classList.toggle('active-era',Number(group.dataset.year)===year);
   const era=archive.eras.find(e=>e.year===year),specimen=era.specimen;
   $('#specimen-glyph').className=specimen.fontClass;
   $('#specimen-material').textContent=specimen.material;
@@ -298,7 +299,7 @@ function updateTimeline(year) {
     swatch.title=`${color.label} ${color.hex}`;swatch.setAttribute('aria-label',swatch.title);
     $('#specimen-colors').append(swatch);
   }
-  if(active)$('#era-scroll').scrollTo({top:active.offsetTop,behavior:reduced?'instant':'smooth'});
+  if(active){const view=$('#era-scroll');view.scrollTo({top:Math.max(0,active.offsetTop-view.clientHeight*.42),behavior:reduced?'instant':'smooth'});}
 }
 
 for(const era of archive.eras) {
@@ -317,7 +318,9 @@ for(const era of archive.eras) {
   }
   $('#archive').append(section);
   const item=document.createElement('section');item.className='era-event';item.dataset.year=era.year;
-  const heading=document.createElement('h2');heading.textContent=`${era.year}s`;
+  const heading=document.createElement('h2');
+  const number=document.createElement('span');number.className='era-number';number.textContent=era.year;
+  const suffix=document.createElement('span');suffix.className='era-suffix';suffix.textContent='s';heading.append(number,suffix);
   const policy=document.createElement('p');policy.textContent=era.policy;
   const material=document.createElement('p');material.className='material-change';
   material.setAttribute('aria-label','재질·기술·표현의 변화');material.textContent=era.materialChange;
@@ -372,13 +375,16 @@ function scrollRightTimeline(e){
 }
 $('#timeline').addEventListener('wheel',scrollRightTimeline,{passive:false});
 $('#timeline-scroll-zone').addEventListener('wheel',scrollRightTimeline,{passive:false});
-let boundaryTouchY;
-$('#timeline-scroll-zone').addEventListener('touchstart',e=>{boundaryTouchY=e.touches[0].clientY;},{passive:true});
-$('#timeline-scroll-zone').addEventListener('touchmove',e=>{
-  if(boundaryTouchY==null)return;e.preventDefault();e.stopPropagation();
-  const y=e.touches[0].clientY;$('#era-scroll').scrollTop+=boundaryTouchY-y;boundaryTouchY=y;
-},{passive:false});
-$('#timeline-scroll-zone').addEventListener('touchend',()=>boundaryTouchY=null);
+for(const zone of [$('#timeline-scroll-zone'),$('#timeline-bottom-scroll')]){
+  let touchY;
+  zone.addEventListener('touchstart',e=>{touchY=e.touches[0].clientY;},{passive:true});
+  zone.addEventListener('touchmove',e=>{
+    if(touchY==null)return;e.preventDefault();e.stopPropagation();
+    const y=e.touches[0].clientY;$('#era-scroll').scrollTop+=touchY-y;touchY=y;
+  },{passive:false});
+  zone.addEventListener('touchend',()=>touchY=null);
+  zone.addEventListener('touchcancel',()=>touchY=null);
+}
 const axes={x:new THREE.Vector3(1,0,0),y:new THREE.Vector3(0,1,0),z:new THREE.Vector3(0,0,1)};
 function rotateModel(x,y,z){
   // Quaternion increments avoid pole limits and Euler gimbal lock.

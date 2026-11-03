@@ -77,3 +77,28 @@ html,body{height:100%;overflow:hidden;overscroll-behavior:none}
 }
 #caption{background:#101010;border-left:2px solid #560e45;padding:14px 18px}
 #timeline-scroll-zone{touch-action:none}
+
+/* Compact unboxed chronology, with a separate lower scroll surface. */
+#era-scroll{flex:0 1 auto;height:min(46dvh,550px);min-height:140px;padding-bottom:55vh}
+#timeline-bottom-scroll{flex:1;min-height:64px;border-top:1px solid rgb(86 14 69 / .6);background:transparent;cursor:ns-resize;touch-action:none}
+.era-event{opacity:.25;transition:opacity .25s ease;padding-bottom:32px}
+.era-event.active{opacity:1}
+.era-event .material-change{background:transparent;border:0;padding:0;color:#c3d132;margin-bottom:18px}
+.era-event:not(.active) h2{opacity:1}
+.era-event h2{display:flex;align-items:baseline;gap:3px;line-height:1.15;margin-bottom:20px;font-weight:400}
+.era-number{font-size:38px;font-variant-numeric:tabular-nums;letter-spacing:-1.2px}
+.era-suffix{font-size:23px}
+.era-event.active .era-number{font-size:62px;font-weight:600;letter-spacing:-2px}
+.era-event.active .era-suffix{font-size:28px}
+.era-event.active::before{top:25px}
+#archive .era-group .era-label{opacity:.35}
+#archive .era-group.active-era .era-label{opacity:1;color:#c3d132;font-size:clamp(20px,1.5vw,30px)}
+@media(max-width:700px){
+ #era-scroll{height:44dvh;min-height:130px}
+ .era-number{font-size:24px}.era-suffix{font-size:14px}
+ .era-event.active .era-number{font-size:36px;letter-spacing:-1px}.era-event.active .era-suffix{font-size:17px}
+ .era-event.active::before{top:14px}
+ #archive .era-group.active-era .era-label{font-size:17px}
+}
+#era-scroll{padding-bottom:20px}
+#eras{padding-bottom:55vh}
