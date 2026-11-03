@@ -5,77 +5,396 @@
       "description": "흰 목판에 단색 한자로 상호를 쓰고, 철제 간판에는 페인트로 글씨를 썼다.",
       "policy": "1913 「도로취체규칙」 제정으로 도로 통행과 시설물을 단속했다.",
       "sourcePage": 6,
-      "materialChange": "목판·철판에 손으로 글씨를 쓰고, 낮은 건물에 큰 글씨판을 내걸었다."
+      "materialChange": "목판·철판에 손으로 글씨를 쓰고, 낮은 건물에 큰 글씨판을 내걸었다.",
+      "specimen": {
+        "typeFamily": "붓글씨 한자·한글 병기",
+        "material": "목판·철제에 페인트",
+        "fontClass": "brush",
+        "palette": [
+          {
+            "hex": "#F2EEE6",
+            "label": "흰 목판"
+          },
+          {
+            "hex": "#1E1E1E",
+            "label": "단색 글씨"
+          },
+          {
+            "hex": "#2F4F8A",
+            "label": "법랑"
+          },
+          {
+            "hex": "#E2492F",
+            "label": "네온 적주황"
+          },
+          {
+            "hex": "#7F95C9",
+            "label": "아르곤 청"
+          }
+        ],
+        "sourcePage": 6,
+        "note": "PDF의 서체 계열·대표 색채를 재구성한 견본이며, 역사적 원본 폰트나 실측 색채가 아님."
+      }
     },
     {
       "year": 1920,
       "description": "목판·철제 간판에 한글·한자·일본어를 함께 썼으며, 1920년대 말 경성에 네온이 등장했다.",
       "policy": "1913 「도로취체규칙」이 제정되고 1920년 일부 개정되었다.",
       "sourcePage": 6,
-      "materialChange": "목판·법랑·철제 간판에 한글·한자·일본어를 병기하고, 1920년대 말 경성에 네온이 등장했다."
+      "materialChange": "목판·법랑·철제 간판에 한글·한자·일본어를 병기하고, 1920년대 말 경성에 네온이 등장했다.",
+      "specimen": {
+        "typeFamily": "붓글씨 한자·한글·가나 병기",
+        "material": "목판·법랑·철제",
+        "fontClass": "brush",
+        "palette": [
+          {
+            "hex": "#F2EEE6",
+            "label": "흰 목판"
+          },
+          {
+            "hex": "#1E1E1E",
+            "label": "단색 글씨"
+          },
+          {
+            "hex": "#2F4F8A",
+            "label": "법랑"
+          },
+          {
+            "hex": "#E2492F",
+            "label": "네온 적주황"
+          },
+          {
+            "hex": "#7F95C9",
+            "label": "아르곤 청"
+          }
+        ],
+        "sourcePage": 6,
+        "note": "PDF의 서체 계열·대표 색채를 재구성한 견본이며, 역사적 원본 폰트나 실측 색채가 아님."
+      }
     },
     {
       "year": 1930,
       "description": "유리·철제 등 새로운 재료와 한글·한자 병기 간판이 등장했다.",
       "policy": "1938 「도로취체규칙」이 전부 개정되었다.",
       "sourcePage": 6,
-      "materialChange": "유리관을 이용한 네온 간판이 번화가로 확산되고, 붓글씨와 여러 문자를 함께 사용했다."
+      "materialChange": "유리관을 이용한 네온 간판이 번화가로 확산되고, 붓글씨와 여러 문자를 함께 사용했다.",
+      "specimen": {
+        "typeFamily": "붓글씨 한자·한글·가나 병기",
+        "material": "철제 페인트·네온관",
+        "fontClass": "brush",
+        "palette": [
+          {
+            "hex": "#F2EEE6",
+            "label": "흰 목판"
+          },
+          {
+            "hex": "#1E1E1E",
+            "label": "단색 글씨"
+          },
+          {
+            "hex": "#2F4F8A",
+            "label": "법랑"
+          },
+          {
+            "hex": "#E2492F",
+            "label": "네온 적주황"
+          },
+          {
+            "hex": "#7F95C9",
+            "label": "아르곤 청"
+          }
+        ],
+        "sourcePage": 6,
+        "note": "PDF의 서체 계열·대표 색채를 재구성한 견본이며, 역사적 원본 폰트나 실측 색채가 아님."
+      }
     },
     {
       "year": 1950,
       "description": "가볍고 칠하기 쉬운 함석판에 손으로 페인트 글씨를 쓴 간판이 확산되었다.",
       "policy": "광복 후 가나 간판 제거에 이어 한자·외국문자 간판 단속이 이루어졌다.",
       "sourcePage": 7,
-      "materialChange": "가볍고 칠하기 쉬운 함석판에 페인트로 한글·한자 상호를 크게 써 넣었다."
+      "materialChange": "가볍고 칠하기 쉬운 함석판에 페인트로 한글·한자 상호를 크게 써 넣었다.",
+      "specimen": {
+        "typeFamily": "손 페인트 글씨·한글·한자 혼용",
+        "material": "함석판에 페인트",
+        "fontClass": "brush",
+        "palette": [
+          {
+            "hex": "#F5F3EE",
+            "label": "흰 바탕"
+          },
+          {
+            "hex": "#1A1A1A",
+            "label": "검은 글씨"
+          },
+          {
+            "hex": "#9A9C9E",
+            "label": "함석"
+          },
+          {
+            "hex": "#B23A2E",
+            "label": "페인트 적색"
+          },
+          {
+            "hex": "#2E5E8C",
+            "label": "페인트 청색"
+          }
+        ],
+        "sourcePage": 7,
+        "note": "PDF의 서체 계열·대표 색채를 재구성한 견본이며, 역사적 원본 폰트나 실측 색채가 아님."
+      }
     },
     {
       "year": 1960,
       "description": "함석·목판·철판에 한글과 한자를 쓰고, 서로 다른 크기와 글자체의 간판을 걸었다.",
       "policy": "1962 「광고물등단속법」 제정, 1963 전단을 규제 대상에 추가했다.",
       "sourcePage": 7,
-      "materialChange": "T/C천과 함석·철판 입체문자가 쓰였으며, 서로 다른 크기와 손글씨가 거리에서 공존했다."
+      "materialChange": "T/C천과 함석·철판 입체문자가 쓰였으며, 서로 다른 크기와 손글씨가 거리에서 공존했다.",
+      "specimen": {
+        "typeFamily": "손 페인트 글씨·한글·한자 혼용",
+        "material": "함석·철판 입체문자",
+        "fontClass": "brush",
+        "palette": [
+          {
+            "hex": "#F5F3EE",
+            "label": "흰 바탕"
+          },
+          {
+            "hex": "#1A1A1A",
+            "label": "검은 글씨"
+          },
+          {
+            "hex": "#9A9C9E",
+            "label": "함석"
+          },
+          {
+            "hex": "#B23A2E",
+            "label": "페인트 적색"
+          },
+          {
+            "hex": "#2E5E8C",
+            "label": "페인트 청색"
+          }
+        ],
+        "sourcePage": 7,
+        "note": "PDF의 서체 계열·대표 색채를 재구성한 견본이며, 역사적 원본 폰트나 실측 색채가 아님."
+      }
     },
     {
       "year": 1970,
       "description": "아크릴과 형광등으로 간판 면을 밝히고, 시트지를 잘라 글자를 만들었다.",
       "policy": "1973년경 간판 한글 포함 규정이 마련되고, 석유파동으로 광고 네온이 금지되었다.",
       "sourcePage": 8,
-      "materialChange": "아크릴과 형광등으로 간판 면을 밝히고, 시트지를 잘라 만든 큰 글자가 면을 채웠다."
+      "materialChange": "아크릴과 형광등으로 간판 면을 밝히고, 시트지를 잘라 만든 큰 글자가 면을 채웠다.",
+      "specimen": {
+        "typeFamily": "시트지 커팅 고딕·둥근고딕",
+        "material": "아크릴·형광등",
+        "fontClass": "gothic",
+        "palette": [
+          {
+            "hex": "#FAFAF2",
+            "label": "형광 백색"
+          },
+          {
+            "hex": "#D7261E",
+            "label": "원색 적"
+          },
+          {
+            "hex": "#1F4FA0",
+            "label": "원색 청"
+          },
+          {
+            "hex": "#F2C200",
+            "label": "원색 황"
+          },
+          {
+            "hex": "#222222",
+            "label": "시트 문자"
+          }
+        ],
+        "sourcePage": 8,
+        "note": "PDF의 서체 계열·대표 색채를 재구성한 견본이며, 역사적 원본 폰트나 실측 색채가 아님."
+      }
     },
     {
       "year": 1980,
       "description": "내부조명 간판과 유연성 원단이 확산되고, 유리창까지 선팅 광고로 채워졌다.",
       "policy": "1980 「광고물등관리법」으로 개칭하고 관리 권한의 일반 행정 위임을 허용했다.",
       "sourcePage": 9,
-      "materialChange": "내부조명·유연성 원단 간판이 확산되고, 유리창에 상호와 그림을 넣는 선팅 광고가 등장했다."
+      "materialChange": "내부조명·유연성 원단 간판이 확산되고, 유리창에 상호와 그림을 넣는 선팅 광고가 등장했다.",
+      "specimen": {
+        "typeFamily": "넓적붓 페인트 글씨·필름 레터링",
+        "material": "내부조명·유연성 원단",
+        "fontClass": "brush",
+        "palette": [
+          {
+            "hex": "#E0201B",
+            "label": "적"
+          },
+          {
+            "hex": "#1E8C45",
+            "label": "녹"
+          },
+          {
+            "hex": "#1E50B4",
+            "label": "청"
+          },
+          {
+            "hex": "#FF4FA8",
+            "label": "네온 분홍"
+          },
+          {
+            "hex": "#F7F3E8",
+            "label": "선팅 바탕"
+          }
+        ],
+        "sourcePage": 9,
+        "note": "PDF의 서체 계열·대표 색채를 재구성한 견본이며, 역사적 원본 폰트나 실측 색채가 아님."
+      }
     },
     {
       "year": 1990,
       "description": "플렉스와 디지털 프린팅으로 문자뿐 아니라 사진·그림을 간판에 담았다.",
       "policy": "1990 「옥외광고물등관리법」 전부 개정으로 허가·신고제와 안전도검사가 도입되었다.",
       "sourcePage": 10,
-      "materialChange": "플렉스·실사 출력과 디지털 폰트가 확산되고, 사진·그림·풀컬러 LED 전광판이 더해졌다."
+      "materialChange": "플렉스·실사 출력과 디지털 폰트가 확산되고, 사진·그림·풀컬러 LED 전광판이 더해졌다.",
+      "specimen": {
+        "typeFamily": "디지털 폰트·실사 출력",
+        "material": "플렉스·디지털 프린팅",
+        "fontClass": "digital",
+        "palette": [
+          {
+            "hex": "#E60012",
+            "label": "플렉스 적"
+          },
+          {
+            "hex": "#0067B1",
+            "label": "플렉스 청"
+          },
+          {
+            "hex": "#FFD100",
+            "label": "플렉스 황"
+          },
+          {
+            "hex": "#00A04A",
+            "label": "플렉스 녹"
+          },
+          {
+            "hex": "#FFFFFF",
+            "label": "유백 원단"
+          }
+        ],
+        "sourcePage": 10,
+        "note": "PDF의 서체 계열·대표 색채를 재구성한 견본이며, 역사적 원본 폰트나 실측 색채가 아님."
+      }
     },
     {
       "year": 2000,
       "description": "LED 채널 입체문자와 고해상도 사진 간판이 확산되었다.",
       "policy": "2007 ‘아름다운 간판’ 원년 이후 수량 축소와 디자인 개선 사업이 추진되었다.",
       "sourcePage": 11,
-      "materialChange": "금속 입체문자에 LED를 넣는 채널간판과 고해상도 음식·인물 사진 간판이 확산되었다."
+      "materialChange": "금속 입체문자에 LED를 넣는 채널간판과 고해상도 음식·인물 사진 간판이 확산되었다.",
+      "specimen": {
+        "typeFamily": "채널 입체문자·사진과 원색 문구",
+        "material": "LED·금속 채널간판",
+        "fontClass": "digital",
+        "palette": [
+          {
+            "hex": "#FF1F4B",
+            "label": "LED 적"
+          },
+          {
+            "hex": "#18C3FF",
+            "label": "LED 청"
+          },
+          {
+            "hex": "#3BE36B",
+            "label": "LED 녹"
+          },
+          {
+            "hex": "#F4FF2E",
+            "label": "형광색"
+          },
+          {
+            "hex": "#EDE6D8",
+            "label": "미색 바탕"
+          }
+        ],
+        "sourcePage": 11,
+        "note": "PDF의 서체 계열·대표 색채를 재구성한 견본이며, 역사적 원본 폰트나 실측 색채가 아님."
+      }
     },
     {
       "year": 2010,
       "description": "디지털광고물과 복고 서체가 함께 등장하며 간판의 표현 방식이 다양해졌다.",
       "policy": "2016 자유표시구역과 디지털광고물이 제도화되었다.",
       "sourcePage": 12,
-      "materialChange": "내용이 바뀌는 디지털광고물이 등장하고, 옛 간판 붓글씨와 시트지 글자가 디지털 서체로 재해석되었다."
+      "materialChange": "내용이 바뀌는 디지털광고물이 등장하고, 옛 간판 붓글씨와 시트지 글자가 디지털 서체로 재해석되었다.",
+      "specimen": {
+        "typeFamily": "복고 서체의 디지털 재해석",
+        "material": "입체문자·디지털광고물",
+        "fontClass": "brush",
+        "palette": [
+          {
+            "hex": "#5E6B73",
+            "label": "저채도 회청"
+          },
+          {
+            "hex": "#EDE6D8",
+            "label": "미색"
+          },
+          {
+            "hex": "#2A2A2A",
+            "label": "입체 문자"
+          },
+          {
+            "hex": "#C8102E",
+            "label": "원색 악센트"
+          },
+          {
+            "hex": "#101820",
+            "label": "디지털 화면"
+          }
+        ],
+        "sourcePage": 12,
+        "note": "PDF의 서체 계열·대표 색채를 재구성한 견본이며, 역사적 원본 폰트나 실측 색채가 아님."
+      }
     },
     {
       "year": 2020,
       "description": "정돈된 입체문자 간판과 초대형 디지털 전광판이 공존한다.",
       "policy": "2023 명동·광화문·해운대가 제2기 옥외광고 자유표시구역으로 지정되었다.",
       "sourcePage": 12,
-      "materialChange": "입체문자 중심의 정돈된 간판과 초대형 디지털 화면이 공존하며 빛과 화면 변화가 표현 수단이 되었다."
+      "materialChange": "입체문자 중심의 정돈된 간판과 초대형 디지털 화면이 공존하며 빛과 화면 변화가 표현 수단이 되었다.",
+      "specimen": {
+        "typeFamily": "복고 서체·디지털 글자",
+        "material": "입체문자·디지털 화면",
+        "fontClass": "gothic",
+        "palette": [
+          {
+            "hex": "#5E6B73",
+            "label": "저채도 회청"
+          },
+          {
+            "hex": "#EDE6D8",
+            "label": "미색"
+          },
+          {
+            "hex": "#2A2A2A",
+            "label": "입체 문자"
+          },
+          {
+            "hex": "#C8102E",
+            "label": "원색 악센트"
+          },
+          {
+            "hex": "#101820",
+            "label": "디지털 화면"
+          }
+        ],
+        "sourcePage": 12,
+        "note": "PDF의 서체 계열·대표 색채를 재구성한 견본이며, 역사적 원본 폰트나 실측 색채가 아님."
+      }
     }
   ],
   "photos": [

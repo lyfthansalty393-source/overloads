@@ -32,7 +32,7 @@ html,body{height:100%;overflow:hidden;overscroll-behavior:none}
 .photo-button.scroll-selected:hover,.photo-button[aria-current="true"]:hover{transform:translate(24px,-5px)}
 @font-face{font-family:Pretendard;src:url('./assets/fonts/PretendardVariable.woff2') format('woff2');font-style:normal;font-weight:100 900;font-display:swap}
 #back{display:inline-flex;align-items:center;gap:8px;background:transparent;border:0;outline:0;box-shadow:none;font-family:Pretendard,sans-serif;font-size:14pt;font-weight:400;letter-spacing:-.3px;color:#fafafa;padding:12px 0}
-#back:focus-visible{text-decoration:underline;text-underline-offset:4px}
+#back:focus-visible{text-decoration:none;opacity:.75}
 @media(max-width:700px){#archive{width:calc(16vw + 24px)}#stage{left:calc(16% + 24px)}}
 
 /* Full-viewport model behind all archive/caption UI; no central clipping. */
@@ -47,6 +47,46 @@ html,body{height:100%;overflow:hidden;overscroll-behavior:none}
 
 .era-event .material-change{color:#560e45;margin:0 0 20px;line-height:1.7}
 
+/* Opaque framed timeline and a dedicated scroll-only gutter. */
+:root{--timeline-width:19.1vw}
+#timeline{width:var(--timeline-width);padding:0;overflow:hidden;background:#101010;display:flex;flex-direction:column;border-left:2px solid #560e45}
+#stage{right:var(--timeline-width)}
+#era-specimen{flex:none;min-height:210px;display:grid;grid-template-columns:42% 1fr;align-items:center;gap:12px;padding:24px 18px;background:linear-gradient(rgb(86 14 69 / .16),rgb(86 14 69 / .16)),#101010;border-bottom:3px solid #560e45}
+#specimen-glyph{font-family:Pretendard,sans-serif;font-size:clamp(92px,7vw,152px);line-height:1.1;text-align:center;border-right:3px solid #560e45;padding-right:12px;color:#fafafa}
+@font-face{font-family:NanumBrush;src:url('./assets/fonts/NanumBrushScript-Regular.ttf') format('truetype');font-style:normal;font-weight:400;font-display:swap}
+#specimen-glyph.brush{font-family:NanumBrush,serif;font-weight:400}
+#specimen-glyph.gothic{font-family:Pretendard,sans-serif;font-weight:900;letter-spacing:-.07em}
+#specimen-glyph.digital{font-family:Pretendard,sans-serif;font-weight:700;letter-spacing:-.025em}
+#specimen-info{min-width:0}#specimen-info p{margin:0 0 12px;line-height:1.5;word-break:keep-all}
+#specimen-material{font-size:13px;background:rgb(250 250 250 / .13);border:1px solid rgb(250 250 250 / .2);padding:9px 7px;text-align:center}
+#specimen-type{font-size:12px;color:rgb(250 250 250 / .7)}
+#specimen-colors{display:flex;width:100%;height:26px;border:1px solid rgb(250 250 250 / .18)}#specimen-colors span{display:block;flex:1;min-width:0}
+#era-scroll{position:relative;min-height:0;flex:1;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none;padding:30px 20px 45vh}
+#era-scroll::-webkit-scrollbar{display:none}#eras{transform:none!important;transition:none}
+.era-event{opacity:1;padding-bottom:40px}.era-event h2{font-size:clamp(24px,1.65vw,34px);margin-bottom:20px}
+.era-event:not(.active) h2{opacity:.6}.era-event p{font-size:clamp(14px,.94vw,18px)}
+.era-event .material-change{background:#c3d132;color:#560e45;border:1px solid #c3d132;padding:18px;margin:0 0 20px;line-height:1.75}
+.era-event .material-change,.era-event.active{opacity:1}.era-event.active::before{left:-26px}
+#timeline-scroll-zone{position:fixed;top:0;bottom:0;z-index:3;touch-action:pan-y;cursor:ns-resize;background:transparent}
+#photo-year{font-size:clamp(24px,1.55vw,32px);line-height:1.35}
+#photo-description{font-size:15px;line-height:1.85;color:rgb(250 250 250 / .8)}
+#archive .era-label{font-size:clamp(15px,1.2vw,25px)}
+#back,#back:hover,#back:focus,#back:focus-visible{text-decoration:none}
+@media(max-width:700px){
+ :root{--timeline-width:26vw}
+ #timeline{width:var(--timeline-width)}#stage{right:var(--timeline-width)}
+ #era-specimen{min-height:190px;padding:12px 8px;grid-template-columns:1fr;gap:8px}
+ #specimen-glyph{font-size:64px;border-right:0;border-bottom:2px solid #560e45;padding:0}
+ #specimen-material{font-size:10px;padding:5px 3px}#specimen-type{font-size:10px}
+ #specimen-info p{margin-bottom:7px}#specimen-colors{height:16px}
+ #era-scroll{padding:18px 8px 40vh}.era-event h2{font-size:21px}.era-event p{font-size:12px}
+ .era-event .material-change{padding:10px}.era-event.active::before{left:-14px}
+ #photo-year{font-size:24px}#photo-description{font-size:14px}
+ #archive .era-label{font-size:13px}
+}
+#caption{background:#101010;border-left:2px solid #560e45;padding:14px 18px}
+#timeline-scroll-zone{touch-action:none}
+
 </style>
 </head>
 <body>
@@ -59,9 +99,16 @@ html,body{height:100%;overflow:hidden;overscroll-behavior:none}
     </div>
     <div id="caption" aria-live="polite"><p id="photo-year"></p><p id="photo-description"></p></div>
   </main>
-  <aside id="timeline" aria-label="시대별 제도"><div id="eras"></div></aside>
+  <div id="timeline-scroll-zone" aria-label="오른쪽 타임라인 스크롤 영역"></div>
+  <aside id="timeline" aria-label="시대별 재질·서체·색상과 제도">
+    <header id="era-specimen" aria-live="polite">
+      <div id="specimen-glyph" aria-hidden="true">가</div>
+      <div id="specimen-info"><p id="specimen-material"></p><p id="specimen-type"></p><div id="specimen-colors" aria-label="시대별 대표 색채"></div></div>
+    </header>
+    <div id="era-scroll"><div id="eras"></div></div>
+  </aside>
   <dialog id="enlarged" aria-label="확대한 사진">
-    <button id="back" type="button" aria-label="되돌아가기"><span aria-hidden="true">&lt;</span><span>되돌아가기</span></button>
+    <button id="back" type="button" aria-label="돌아가기"><span aria-hidden="true">-</span><span>돌아가기</span></button>
     <div id="zoom-surface"><img id="zoom-photo" alt=""></div>
   </dialog>
   <script id="archive-data" type="application/json">{
@@ -71,77 +118,396 @@ html,body{height:100%;overflow:hidden;overscroll-behavior:none}
       "description": "흰 목판에 단색 한자로 상호를 쓰고, 철제 간판에는 페인트로 글씨를 썼다.",
       "policy": "1913 「도로취체규칙」 제정으로 도로 통행과 시설물을 단속했다.",
       "sourcePage": 6,
-      "materialChange": "목판·철판에 손으로 글씨를 쓰고, 낮은 건물에 큰 글씨판을 내걸었다."
+      "materialChange": "목판·철판에 손으로 글씨를 쓰고, 낮은 건물에 큰 글씨판을 내걸었다.",
+      "specimen": {
+        "typeFamily": "붓글씨 한자·한글 병기",
+        "material": "목판·철제에 페인트",
+        "fontClass": "brush",
+        "palette": [
+          {
+            "hex": "#F2EEE6",
+            "label": "흰 목판"
+          },
+          {
+            "hex": "#1E1E1E",
+            "label": "단색 글씨"
+          },
+          {
+            "hex": "#2F4F8A",
+            "label": "법랑"
+          },
+          {
+            "hex": "#E2492F",
+            "label": "네온 적주황"
+          },
+          {
+            "hex": "#7F95C9",
+            "label": "아르곤 청"
+          }
+        ],
+        "sourcePage": 6,
+        "note": "PDF의 서체 계열·대표 색채를 재구성한 견본이며, 역사적 원본 폰트나 실측 색채가 아님."
+      }
     },
     {
       "year": 1920,
       "description": "목판·철제 간판에 한글·한자·일본어를 함께 썼으며, 1920년대 말 경성에 네온이 등장했다.",
       "policy": "1913 「도로취체규칙」이 제정되고 1920년 일부 개정되었다.",
       "sourcePage": 6,
-      "materialChange": "목판·법랑·철제 간판에 한글·한자·일본어를 병기하고, 1920년대 말 경성에 네온이 등장했다."
+      "materialChange": "목판·법랑·철제 간판에 한글·한자·일본어를 병기하고, 1920년대 말 경성에 네온이 등장했다.",
+      "specimen": {
+        "typeFamily": "붓글씨 한자·한글·가나 병기",
+        "material": "목판·법랑·철제",
+        "fontClass": "brush",
+        "palette": [
+          {
+            "hex": "#F2EEE6",
+            "label": "흰 목판"
+          },
+          {
+            "hex": "#1E1E1E",
+            "label": "단색 글씨"
+          },
+          {
+            "hex": "#2F4F8A",
+            "label": "법랑"
+          },
+          {
+            "hex": "#E2492F",
+            "label": "네온 적주황"
+          },
+          {
+            "hex": "#7F95C9",
+            "label": "아르곤 청"
+          }
+        ],
+        "sourcePage": 6,
+        "note": "PDF의 서체 계열·대표 색채를 재구성한 견본이며, 역사적 원본 폰트나 실측 색채가 아님."
+      }
     },
     {
       "year": 1930,
       "description": "유리·철제 등 새로운 재료와 한글·한자 병기 간판이 등장했다.",
       "policy": "1938 「도로취체규칙」이 전부 개정되었다.",
       "sourcePage": 6,
-      "materialChange": "유리관을 이용한 네온 간판이 번화가로 확산되고, 붓글씨와 여러 문자를 함께 사용했다."
+      "materialChange": "유리관을 이용한 네온 간판이 번화가로 확산되고, 붓글씨와 여러 문자를 함께 사용했다.",
+      "specimen": {
+        "typeFamily": "붓글씨 한자·한글·가나 병기",
+        "material": "철제 페인트·네온관",
+        "fontClass": "brush",
+        "palette": [
+          {
+            "hex": "#F2EEE6",
+            "label": "흰 목판"
+          },
+          {
+            "hex": "#1E1E1E",
+            "label": "단색 글씨"
+          },
+          {
+            "hex": "#2F4F8A",
+            "label": "법랑"
+          },
+          {
+            "hex": "#E2492F",
+            "label": "네온 적주황"
+          },
+          {
+            "hex": "#7F95C9",
+            "label": "아르곤 청"
+          }
+        ],
+        "sourcePage": 6,
+        "note": "PDF의 서체 계열·대표 색채를 재구성한 견본이며, 역사적 원본 폰트나 실측 색채가 아님."
+      }
     },
     {
       "year": 1950,
       "description": "가볍고 칠하기 쉬운 함석판에 손으로 페인트 글씨를 쓴 간판이 확산되었다.",
       "policy": "광복 후 가나 간판 제거에 이어 한자·외국문자 간판 단속이 이루어졌다.",
       "sourcePage": 7,
-      "materialChange": "가볍고 칠하기 쉬운 함석판에 페인트로 한글·한자 상호를 크게 써 넣었다."
+      "materialChange": "가볍고 칠하기 쉬운 함석판에 페인트로 한글·한자 상호를 크게 써 넣었다.",
+      "specimen": {
+        "typeFamily": "손 페인트 글씨·한글·한자 혼용",
+        "material": "함석판에 페인트",
+        "fontClass": "brush",
+        "palette": [
+          {
+            "hex": "#F5F3EE",
+            "label": "흰 바탕"
+          },
+          {
+            "hex": "#1A1A1A",
+            "label": "검은 글씨"
+          },
+          {
+            "hex": "#9A9C9E",
+            "label": "함석"
+          },
+          {
+            "hex": "#B23A2E",
+            "label": "페인트 적색"
+          },
+          {
+            "hex": "#2E5E8C",
+            "label": "페인트 청색"
+          }
+        ],
+        "sourcePage": 7,
+        "note": "PDF의 서체 계열·대표 색채를 재구성한 견본이며, 역사적 원본 폰트나 실측 색채가 아님."
+      }
     },
     {
       "year": 1960,
       "description": "함석·목판·철판에 한글과 한자를 쓰고, 서로 다른 크기와 글자체의 간판을 걸었다.",
       "policy": "1962 「광고물등단속법」 제정, 1963 전단을 규제 대상에 추가했다.",
       "sourcePage": 7,
-      "materialChange": "T/C천과 함석·철판 입체문자가 쓰였으며, 서로 다른 크기와 손글씨가 거리에서 공존했다."
+      "materialChange": "T/C천과 함석·철판 입체문자가 쓰였으며, 서로 다른 크기와 손글씨가 거리에서 공존했다.",
+      "specimen": {
+        "typeFamily": "손 페인트 글씨·한글·한자 혼용",
+        "material": "함석·철판 입체문자",
+        "fontClass": "brush",
+        "palette": [
+          {
+            "hex": "#F5F3EE",
+            "label": "흰 바탕"
+          },
+          {
+            "hex": "#1A1A1A",
+            "label": "검은 글씨"
+          },
+          {
+            "hex": "#9A9C9E",
+            "label": "함석"
+          },
+          {
+            "hex": "#B23A2E",
+            "label": "페인트 적색"
+          },
+          {
+            "hex": "#2E5E8C",
+            "label": "페인트 청색"
+          }
+        ],
+        "sourcePage": 7,
+        "note": "PDF의 서체 계열·대표 색채를 재구성한 견본이며, 역사적 원본 폰트나 실측 색채가 아님."
+      }
     },
     {
       "year": 1970,
       "description": "아크릴과 형광등으로 간판 면을 밝히고, 시트지를 잘라 글자를 만들었다.",
       "policy": "1973년경 간판 한글 포함 규정이 마련되고, 석유파동으로 광고 네온이 금지되었다.",
       "sourcePage": 8,
-      "materialChange": "아크릴과 형광등으로 간판 면을 밝히고, 시트지를 잘라 만든 큰 글자가 면을 채웠다."
+      "materialChange": "아크릴과 형광등으로 간판 면을 밝히고, 시트지를 잘라 만든 큰 글자가 면을 채웠다.",
+      "specimen": {
+        "typeFamily": "시트지 커팅 고딕·둥근고딕",
+        "material": "아크릴·형광등",
+        "fontClass": "gothic",
+        "palette": [
+          {
+            "hex": "#FAFAF2",
+            "label": "형광 백색"
+          },
+          {
+            "hex": "#D7261E",
+            "label": "원색 적"
+          },
+          {
+            "hex": "#1F4FA0",
+            "label": "원색 청"
+          },
+          {
+            "hex": "#F2C200",
+            "label": "원색 황"
+          },
+          {
+            "hex": "#222222",
+            "label": "시트 문자"
+          }
+        ],
+        "sourcePage": 8,
+        "note": "PDF의 서체 계열·대표 색채를 재구성한 견본이며, 역사적 원본 폰트나 실측 색채가 아님."
+      }
     },
     {
       "year": 1980,
       "description": "내부조명 간판과 유연성 원단이 확산되고, 유리창까지 선팅 광고로 채워졌다.",
       "policy": "1980 「광고물등관리법」으로 개칭하고 관리 권한의 일반 행정 위임을 허용했다.",
       "sourcePage": 9,
-      "materialChange": "내부조명·유연성 원단 간판이 확산되고, 유리창에 상호와 그림을 넣는 선팅 광고가 등장했다."
+      "materialChange": "내부조명·유연성 원단 간판이 확산되고, 유리창에 상호와 그림을 넣는 선팅 광고가 등장했다.",
+      "specimen": {
+        "typeFamily": "넓적붓 페인트 글씨·필름 레터링",
+        "material": "내부조명·유연성 원단",
+        "fontClass": "brush",
+        "palette": [
+          {
+            "hex": "#E0201B",
+            "label": "적"
+          },
+          {
+            "hex": "#1E8C45",
+            "label": "녹"
+          },
+          {
+            "hex": "#1E50B4",
+            "label": "청"
+          },
+          {
+            "hex": "#FF4FA8",
+            "label": "네온 분홍"
+          },
+          {
+            "hex": "#F7F3E8",
+            "label": "선팅 바탕"
+          }
+        ],
+        "sourcePage": 9,
+        "note": "PDF의 서체 계열·대표 색채를 재구성한 견본이며, 역사적 원본 폰트나 실측 색채가 아님."
+      }
     },
     {
       "year": 1990,
       "description": "플렉스와 디지털 프린팅으로 문자뿐 아니라 사진·그림을 간판에 담았다.",
       "policy": "1990 「옥외광고물등관리법」 전부 개정으로 허가·신고제와 안전도검사가 도입되었다.",
       "sourcePage": 10,
-      "materialChange": "플렉스·실사 출력과 디지털 폰트가 확산되고, 사진·그림·풀컬러 LED 전광판이 더해졌다."
+      "materialChange": "플렉스·실사 출력과 디지털 폰트가 확산되고, 사진·그림·풀컬러 LED 전광판이 더해졌다.",
+      "specimen": {
+        "typeFamily": "디지털 폰트·실사 출력",
+        "material": "플렉스·디지털 프린팅",
+        "fontClass": "digital",
+        "palette": [
+          {
+            "hex": "#E60012",
+            "label": "플렉스 적"
+          },
+          {
+            "hex": "#0067B1",
+            "label": "플렉스 청"
+          },
+          {
+            "hex": "#FFD100",
+            "label": "플렉스 황"
+          },
+          {
+            "hex": "#00A04A",
+            "label": "플렉스 녹"
+          },
+          {
+            "hex": "#FFFFFF",
+            "label": "유백 원단"
+          }
+        ],
+        "sourcePage": 10,
+        "note": "PDF의 서체 계열·대표 색채를 재구성한 견본이며, 역사적 원본 폰트나 실측 색채가 아님."
+      }
     },
     {
       "year": 2000,
       "description": "LED 채널 입체문자와 고해상도 사진 간판이 확산되었다.",
       "policy": "2007 ‘아름다운 간판’ 원년 이후 수량 축소와 디자인 개선 사업이 추진되었다.",
       "sourcePage": 11,
-      "materialChange": "금속 입체문자에 LED를 넣는 채널간판과 고해상도 음식·인물 사진 간판이 확산되었다."
+      "materialChange": "금속 입체문자에 LED를 넣는 채널간판과 고해상도 음식·인물 사진 간판이 확산되었다.",
+      "specimen": {
+        "typeFamily": "채널 입체문자·사진과 원색 문구",
+        "material": "LED·금속 채널간판",
+        "fontClass": "digital",
+        "palette": [
+          {
+            "hex": "#FF1F4B",
+            "label": "LED 적"
+          },
+          {
+            "hex": "#18C3FF",
+            "label": "LED 청"
+          },
+          {
+            "hex": "#3BE36B",
+            "label": "LED 녹"
+          },
+          {
+            "hex": "#F4FF2E",
+            "label": "형광색"
+          },
+          {
+            "hex": "#EDE6D8",
+            "label": "미색 바탕"
+          }
+        ],
+        "sourcePage": 11,
+        "note": "PDF의 서체 계열·대표 색채를 재구성한 견본이며, 역사적 원본 폰트나 실측 색채가 아님."
+      }
     },
     {
       "year": 2010,
       "description": "디지털광고물과 복고 서체가 함께 등장하며 간판의 표현 방식이 다양해졌다.",
       "policy": "2016 자유표시구역과 디지털광고물이 제도화되었다.",
       "sourcePage": 12,
-      "materialChange": "내용이 바뀌는 디지털광고물이 등장하고, 옛 간판 붓글씨와 시트지 글자가 디지털 서체로 재해석되었다."
+      "materialChange": "내용이 바뀌는 디지털광고물이 등장하고, 옛 간판 붓글씨와 시트지 글자가 디지털 서체로 재해석되었다.",
+      "specimen": {
+        "typeFamily": "복고 서체의 디지털 재해석",
+        "material": "입체문자·디지털광고물",
+        "fontClass": "brush",
+        "palette": [
+          {
+            "hex": "#5E6B73",
+            "label": "저채도 회청"
+          },
+          {
+            "hex": "#EDE6D8",
+            "label": "미색"
+          },
+          {
+            "hex": "#2A2A2A",
+            "label": "입체 문자"
+          },
+          {
+            "hex": "#C8102E",
+            "label": "원색 악센트"
+          },
+          {
+            "hex": "#101820",
+            "label": "디지털 화면"
+          }
+        ],
+        "sourcePage": 12,
+        "note": "PDF의 서체 계열·대표 색채를 재구성한 견본이며, 역사적 원본 폰트나 실측 색채가 아님."
+      }
     },
     {
       "year": 2020,
       "description": "정돈된 입체문자 간판과 초대형 디지털 전광판이 공존한다.",
       "policy": "2023 명동·광화문·해운대가 제2기 옥외광고 자유표시구역으로 지정되었다.",
       "sourcePage": 12,
-      "materialChange": "입체문자 중심의 정돈된 간판과 초대형 디지털 화면이 공존하며 빛과 화면 변화가 표현 수단이 되었다."
+      "materialChange": "입체문자 중심의 정돈된 간판과 초대형 디지털 화면이 공존하며 빛과 화면 변화가 표현 수단이 되었다.",
+      "specimen": {
+        "typeFamily": "복고 서체·디지털 글자",
+        "material": "입체문자·디지털 화면",
+        "fontClass": "gothic",
+        "palette": [
+          {
+            "hex": "#5E6B73",
+            "label": "저채도 회청"
+          },
+          {
+            "hex": "#EDE6D8",
+            "label": "미색"
+          },
+          {
+            "hex": "#2A2A2A",
+            "label": "입체 문자"
+          },
+          {
+            "hex": "#C8102E",
+            "label": "원색 악센트"
+          },
+          {
+            "hex": "#101820",
+            "label": "디지털 화면"
+          }
+        ],
+        "sourcePage": 12,
+        "note": "PDF의 서체 계열·대표 색채를 재구성한 견본이며, 역사적 원본 폰트나 실측 색채가 아님."
+      }
     }
   ],
   "photos": [
@@ -3788,6 +4154,10 @@ function resize() {
   const width=Math.min(availableWidth,innerHeight*.66*aspect);
   frame.style.width=`${width}px`;frame.style.height=`${width/aspect}px`;
   if(renderer) {renderer.setSize(innerWidth,innerHeight,false);camera.aspect=innerWidth/innerHeight;}
+  const panelLeft=$('#timeline').getBoundingClientRect().left;
+  const zoneLeft=Math.min(panelLeft,frame.getBoundingClientRect().right+12);
+  $('#timeline-scroll-zone').style.left=`${zoneLeft}px`;
+  $('#timeline-scroll-zone').style.width=`${Math.max(0,panelLeft-zoneLeft)}px`;
   dirty=true;
 }
 addEventListener('resize',resize);
@@ -3826,8 +4196,17 @@ function updateTimeline(year) {
   for(const el of $('#eras').children) {
     const yes=Number(el.dataset.year)===year;el.classList.toggle('active',yes);if(yes)active=el;
   }
-  // Restore the earlier multi-era text presentation. Model gestures never call it.
-  if(active)$('#eras').style.transform=`translateY(${-active.offsetTop}px)`;
+  const era=archive.eras.find(e=>e.year===year),specimen=era.specimen;
+  $('#specimen-glyph').className=specimen.fontClass;
+  $('#specimen-material').textContent=specimen.material;
+  $('#specimen-type').textContent=specimen.typeFamily;
+  $('#specimen-colors').replaceChildren();
+  for(const color of specimen.palette){
+    const swatch=document.createElement('span');swatch.style.backgroundColor=color.hex;
+    swatch.title=`${color.label} ${color.hex}`;swatch.setAttribute('aria-label',swatch.title);
+    $('#specimen-colors').append(swatch);
+  }
+  if(active)$('#era-scroll').scrollTo({top:active.offsetTop,behavior:reduced?'instant':'smooth'});
 }
 
 for(const era of archive.eras) {
@@ -3894,7 +4273,20 @@ modelLayer.addEventListener('wheel',e=>{
   const unit=e.deltaMode===1?16:e.deltaMode===2?innerHeight:1;
   zoomModel(e.deltaY*unit);
 },{passive:false});
-$('#timeline').addEventListener('wheel',e=>e.stopPropagation(),{passive:true});
+function scrollRightTimeline(e){
+  e.preventDefault();e.stopPropagation();
+  const unit=e.deltaMode===1?16:e.deltaMode===2?$('#era-scroll').clientHeight:1;
+  $('#era-scroll').scrollTop+=e.deltaY*unit;
+}
+$('#timeline').addEventListener('wheel',scrollRightTimeline,{passive:false});
+$('#timeline-scroll-zone').addEventListener('wheel',scrollRightTimeline,{passive:false});
+let boundaryTouchY;
+$('#timeline-scroll-zone').addEventListener('touchstart',e=>{boundaryTouchY=e.touches[0].clientY;},{passive:true});
+$('#timeline-scroll-zone').addEventListener('touchmove',e=>{
+  if(boundaryTouchY==null)return;e.preventDefault();e.stopPropagation();
+  const y=e.touches[0].clientY;$('#era-scroll').scrollTop+=boundaryTouchY-y;boundaryTouchY=y;
+},{passive:false});
+$('#timeline-scroll-zone').addEventListener('touchend',()=>boundaryTouchY=null);
 const axes={x:new THREE.Vector3(1,0,0),y:new THREE.Vector3(0,1,0),z:new THREE.Vector3(0,0,1)};
 function rotateModel(x,y,z){
   // Quaternion increments avoid pole limits and Euler gimbal lock.

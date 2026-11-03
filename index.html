@@ -18,9 +18,16 @@
     </div>
     <div id="caption" aria-live="polite"><p id="photo-year"></p><p id="photo-description"></p></div>
   </main>
-  <aside id="timeline" aria-label="시대별 제도"><div id="eras"></div></aside>
+  <div id="timeline-scroll-zone" aria-label="오른쪽 타임라인 스크롤 영역"></div>
+  <aside id="timeline" aria-label="시대별 재질·서체·색상과 제도">
+    <header id="era-specimen" aria-live="polite">
+      <div id="specimen-glyph" aria-hidden="true">가</div>
+      <div id="specimen-info"><p id="specimen-material"></p><p id="specimen-type"></p><div id="specimen-colors" aria-label="시대별 대표 색채"></div></div>
+    </header>
+    <div id="era-scroll"><div id="eras"></div></div>
+  </aside>
   <dialog id="enlarged" aria-label="확대한 사진">
-    <button id="back" type="button" aria-label="되돌아가기"><span aria-hidden="true">&lt;</span><span>되돌아가기</span></button>
+    <button id="back" type="button" aria-label="돌아가기"><span aria-hidden="true">-</span><span>돌아가기</span></button>
     <div id="zoom-surface"><img id="zoom-photo" alt=""></div>
   </dialog>
   <script id="archive-data" type="application/json">null</script>

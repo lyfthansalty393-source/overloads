@@ -246,6 +246,10 @@ function resize() {
   const width=Math.min(availableWidth,innerHeight*.66*aspect);
   frame.style.width=`${width}px`;frame.style.height=`${width/aspect}px`;
   if(renderer) {renderer.setSize(innerWidth,innerHeight,false);camera.aspect=innerWidth/innerHeight;}
+  const panelLeft=$('#timeline').getBoundingClientRect().left;
+  const zoneLeft=Math.min(panelLeft,frame.getBoundingClientRect().right+12);
+  $('#timeline-scroll-zone').style.left=`${zoneLeft}px`;
+  $('#timeline-scroll-zone').style.width=`${Math.max(0,panelLeft-zoneLeft)}px`;
   dirty=true;
 }
 addEventListener('resize',resize);
@@ -284,8 +288,17 @@ function updateTimeline(year) {
   for(const el of $('#eras').children) {
     const yes=Number(el.dataset.year)===year;el.classList.toggle('active',yes);if(yes)active=el;
   }
-  // Restore the earlier multi-era text presentation. Model gestures never call it.
-  if(active)$('#eras').style.transform=`translateY(${-active.offsetTop}px)`;
+  const era=archive.eras.find(e=>e.year===year),specimen=era.specimen;
+  $('#specimen-glyph').className=specimen.fontClass;
+  $('#specimen-material').textContent=specimen.material;
+  $('#specimen-type').textContent=specimen.typeFamily;
+  $('#specimen-colors').replaceChildren();
+  for(const color of specimen.palette){
+    const swatch=document.createElement('span');swatch.style.backgroundColor=color.hex;
+    swatch.title=`${color.label} ${color.hex}`;swatch.setAttribute('aria-label',swatch.title);
+    $('#specimen-colors').append(swatch);
+  }
+  if(active)$('#era-scroll').scrollTo({top:active.offsetTop,behavior:reduced?'instant':'smooth'});
 }
 
 for(const era of archive.eras) {
@@ -352,7 +365,20 @@ modelLayer.addEventListener('wheel',e=>{
   const unit=e.deltaMode===1?16:e.deltaMode===2?innerHeight:1;
   zoomModel(e.deltaY*unit);
 },{passive:false});
-$('#timeline').addEventListener('wheel',e=>e.stopPropagation(),{passive:true});
+function scrollRightTimeline(e){
+  e.preventDefault();e.stopPropagation();
+  const unit=e.deltaMode===1?16:e.deltaMode===2?$('#era-scroll').clientHeight:1;
+  $('#era-scroll').scrollTop+=e.deltaY*unit;
+}
+$('#timeline').addEventListener('wheel',scrollRightTimeline,{passive:false});
+$('#timeline-scroll-zone').addEventListener('wheel',scrollRightTimeline,{passive:false});
+let boundaryTouchY;
+$('#timeline-scroll-zone').addEventListener('touchstart',e=>{boundaryTouchY=e.touches[0].clientY;},{passive:true});
+$('#timeline-scroll-zone').addEventListener('touchmove',e=>{
+  if(boundaryTouchY==null)return;e.preventDefault();e.stopPropagation();
+  const y=e.touches[0].clientY;$('#era-scroll').scrollTop+=boundaryTouchY-y;boundaryTouchY=y;
+},{passive:false});
+$('#timeline-scroll-zone').addEventListener('touchend',()=>boundaryTouchY=null);
 const axes={x:new THREE.Vector3(1,0,0),y:new THREE.Vector3(0,1,0),z:new THREE.Vector3(0,0,1)};
 function rotateModel(x,y,z){
   // Quaternion increments avoid pole limits and Euler gimbal lock.

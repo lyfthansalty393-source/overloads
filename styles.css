@@ -23,7 +23,7 @@ html,body{height:100%;overflow:hidden;overscroll-behavior:none}
 .photo-button.scroll-selected:hover,.photo-button[aria-current="true"]:hover{transform:translate(24px,-5px)}
 @font-face{font-family:Pretendard;src:url('./assets/fonts/PretendardVariable.woff2') format('woff2');font-style:normal;font-weight:100 900;font-display:swap}
 #back{display:inline-flex;align-items:center;gap:8px;background:transparent;border:0;outline:0;box-shadow:none;font-family:Pretendard,sans-serif;font-size:14pt;font-weight:400;letter-spacing:-.3px;color:#fafafa;padding:12px 0}
-#back:focus-visible{text-decoration:underline;text-underline-offset:4px}
+#back:focus-visible{text-decoration:none;opacity:.75}
 @media(max-width:700px){#archive{width:calc(16vw + 24px)}#stage{left:calc(16% + 24px)}}
 
 /* Full-viewport model behind all archive/caption UI; no central clipping. */
@@ -37,3 +37,43 @@ html,body{height:100%;overflow:hidden;overscroll-behavior:none}
 #debug-overlay{pointer-events:auto}
 
 .era-event .material-change{color:#560e45;margin:0 0 20px;line-height:1.7}
+
+/* Opaque framed timeline and a dedicated scroll-only gutter. */
+:root{--timeline-width:19.1vw}
+#timeline{width:var(--timeline-width);padding:0;overflow:hidden;background:#101010;display:flex;flex-direction:column;border-left:2px solid #560e45}
+#stage{right:var(--timeline-width)}
+#era-specimen{flex:none;min-height:210px;display:grid;grid-template-columns:42% 1fr;align-items:center;gap:12px;padding:24px 18px;background:linear-gradient(rgb(86 14 69 / .16),rgb(86 14 69 / .16)),#101010;border-bottom:3px solid #560e45}
+#specimen-glyph{font-family:Pretendard,sans-serif;font-size:clamp(92px,7vw,152px);line-height:1.1;text-align:center;border-right:3px solid #560e45;padding-right:12px;color:#fafafa}
+@font-face{font-family:NanumBrush;src:url('./assets/fonts/NanumBrushScript-Regular.ttf') format('truetype');font-style:normal;font-weight:400;font-display:swap}
+#specimen-glyph.brush{font-family:NanumBrush,serif;font-weight:400}
+#specimen-glyph.gothic{font-family:Pretendard,sans-serif;font-weight:900;letter-spacing:-.07em}
+#specimen-glyph.digital{font-family:Pretendard,sans-serif;font-weight:700;letter-spacing:-.025em}
+#specimen-info{min-width:0}#specimen-info p{margin:0 0 12px;line-height:1.5;word-break:keep-all}
+#specimen-material{font-size:13px;background:rgb(250 250 250 / .13);border:1px solid rgb(250 250 250 / .2);padding:9px 7px;text-align:center}
+#specimen-type{font-size:12px;color:rgb(250 250 250 / .7)}
+#specimen-colors{display:flex;width:100%;height:26px;border:1px solid rgb(250 250 250 / .18)}#specimen-colors span{display:block;flex:1;min-width:0}
+#era-scroll{position:relative;min-height:0;flex:1;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none;padding:30px 20px 45vh}
+#era-scroll::-webkit-scrollbar{display:none}#eras{transform:none!important;transition:none}
+.era-event{opacity:1;padding-bottom:40px}.era-event h2{font-size:clamp(24px,1.65vw,34px);margin-bottom:20px}
+.era-event:not(.active) h2{opacity:.6}.era-event p{font-size:clamp(14px,.94vw,18px)}
+.era-event .material-change{background:#c3d132;color:#560e45;border:1px solid #c3d132;padding:18px;margin:0 0 20px;line-height:1.75}
+.era-event .material-change,.era-event.active{opacity:1}.era-event.active::before{left:-26px}
+#timeline-scroll-zone{position:fixed;top:0;bottom:0;z-index:3;touch-action:pan-y;cursor:ns-resize;background:transparent}
+#photo-year{font-size:clamp(24px,1.55vw,32px);line-height:1.35}
+#photo-description{font-size:15px;line-height:1.85;color:rgb(250 250 250 / .8)}
+#archive .era-label{font-size:clamp(15px,1.2vw,25px)}
+#back,#back:hover,#back:focus,#back:focus-visible{text-decoration:none}
+@media(max-width:700px){
+ :root{--timeline-width:26vw}
+ #timeline{width:var(--timeline-width)}#stage{right:var(--timeline-width)}
+ #era-specimen{min-height:190px;padding:12px 8px;grid-template-columns:1fr;gap:8px}
+ #specimen-glyph{font-size:64px;border-right:0;border-bottom:2px solid #560e45;padding:0}
+ #specimen-material{font-size:10px;padding:5px 3px}#specimen-type{font-size:10px}
+ #specimen-info p{margin-bottom:7px}#specimen-colors{height:16px}
+ #era-scroll{padding:18px 8px 40vh}.era-event h2{font-size:21px}.era-event p{font-size:12px}
+ .era-event .material-change{padding:10px}.era-event.active::before{left:-14px}
+ #photo-year{font-size:24px}#photo-description{font-size:14px}
+ #archive .era-label{font-size:13px}
+}
+#caption{background:#101010;border-left:2px solid #560e45;padding:14px 18px}
+#timeline-scroll-zone{touch-action:none}
