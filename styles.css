@@ -8,3 +8,16 @@
 #debug-overlay{position:absolute;inset:0;width:100%;height:100%;z-index:4;touch-action:none}#debug-overlay polygon{stroke:var(--lime);stroke-width:1.5;fill:rgb(195 209 50 / .06)}#debug-overlay circle{fill:var(--plum);stroke:var(--paper);stroke-width:2;cursor:move}#debug-panel{position:fixed;left:12vw;bottom:12px;z-index:7;background:rgb(16 16 16 / .94);border:1px solid var(--plum);padding:10px;font-size:12px;max-width:65vw}#debug-panel pre{max-height:140px;overflow:auto;margin:5px 0;white-space:pre-wrap}#debug-panel button{background:var(--plum);padding:7px 12px;margin-right:8px}#debug-panel select{background:var(--ink);color:var(--paper)}
 @media(max-width:700px){#archive{width:16vw}.era-label{margin-left:2vw;font-size:10px}#stage{left:16%;right:22%;gap:2vh}#picture-frame,#caption{width:94%}#caption{font-size:11px;line-height:1.65}#timeline{width:22%;padding:5vh 2vw}.era-event{padding-bottom:4vh}.era-event h2{font-size:13px}.era-event p{font-size:10px}.era-event.active::before{left:calc(-2vw - 6px)}#back{top:12px;left:12px}#debug-panel{left:17vw;max-width:80vw}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}*,*::before,*::after{transition:none!important}}
+
+/* Fixed archive and timeline: only explicit archive scrolling moves thumbnails. */
+html,body{height:100%;overflow:hidden;overscroll-behavior:none}
+#archive{position:fixed;inset:0 auto 0 0;height:100dvh;min-height:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none;padding-bottom:12vh}
+#archive::-webkit-scrollbar{display:none}
+#stage,#scene{touch-action:none}
+#picture-frame{outline:0;border:0}
+#eras{transform:none!important;transition:none}
+#timeline{overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none;border-left:0}
+#timeline::-webkit-scrollbar{display:none}
+.era-event.active::before,.photo-button[aria-current="true"]::after{display:none}
+
+.era-event:not(.active){display:none}

@@ -7,12 +7,12 @@
     },
     "backWall": {
       "left": 0.37,
-      "top": 0.35,
+      "top": 0.2,
       "right": 0.62,
       "bottom": 0.67
     },
     "sky": {
-      "mode": "far-plane"
+      "mode": "photo"
     },
     "ground": {
       "mode": "photo"
@@ -64,7 +64,7 @@
       "bottom": 0.72
     },
     "sky": {
-      "mode": "far-plane"
+      "mode": "photo"
     },
     "ground": {
       "mode": "photo"

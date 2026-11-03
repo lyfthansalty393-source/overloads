@@ -17,8 +17,11 @@ const [archive, configurations] = await Promise.all([
 const configMap = new Map(configurations.map(c => [c.id, c]));
 const spatial = archive.photos.filter(p => p.spatial);
 const buttons = new Map();
-let current, currentConfig, activeButton, generation = 0, currentTexture;
+let current, currentConfig, activeButton, generation = 0, currentTexture, loadingPhoto=false;
 let frameProgress = 0, dirty = true, disposed = false;
+let travel=0, targetTravel=0, travelVelocity=0, settleTimer;
+let entrance=0, pointerX=0, pointerY=0, lookX=0, lookY=0, lastFrame=0;
+const photoIndex=new Map(archive.photos.map((p,i)=>[p.id,i]));
 const frame = $('#picture-frame');
 const canvas = $('#scene');
 const fallback = $('#fallback');
@@ -72,13 +75,21 @@ export function deriveRoom(config, aspect) {
   // Overshoot is intentionally untextured: missing pixels are never clamped.
   const ratio=Math.max(v.x/(v.x-b.left),(1-v.x)/(b.right-v.x),
     v.y/(v.y-b.top),(1-v.y)/(b.bottom-v.y));
-  const depth=f*(ratio-1)*clamp(config.depth ?? 1,.05,4);
+  let depth=f*(ratio-1)*clamp(config.depth ?? 1,.05,4);
   const backDistance=f+depth, scale=backDistance/f;
   const back=[[b.left,b.top],[b.right,b.top],[b.right,b.bottom],[b.left,b.bottom]];
   const outer=back.map(([x,y])=>[v.x+(x-v.x)*scale,v.y+(y-v.y)*scale]);
   const point=(p,d)=>new THREE.Vector3((p[0]-v.x)*aspect*d/f,(v.y-p[1])*d/f,-d);
-  const B=back.map(p=>point(p,backDistance)), O=outer.map(p=>point(p,f));
-  return {f,depth,backDistance,point,regions:{
+  const projectedBack=back.map(p=>point(p,backDistance));
+  // The photo's VP/back-wall scale establishes the size; all three room axes
+  // use that size, forming an open-front cube rather than a shallow image box.
+  const side=Math.max(projectedBack[0].distanceTo(projectedBack[1]),projectedBack[0].distanceTo(projectedBack[3]));
+  const cx=(projectedBack[0].x+projectedBack[2].x)/2;
+  const cy=(projectedBack[0].y+projectedBack[2].y)/2;
+  depth=side;
+  const B=[[-1,1],[1,1],[1,-1],[-1,-1]].map(([x,y])=>new THREE.Vector3(cx+x*side/2,cy+y*side/2,-f-side));
+  const O=B.map(p=>new THREE.Vector3(p.x,p.y,-f));
+  return {f,depth,side,cx,cy,backDistance:f+side,point,regions:{
     back:{source:back,vertices:B},
     sky:{source:[outer[0],outer[1],back[1],back[0]],vertices:[O[0],O[1],B[1],B[0]]},
     ground:{source:[back[3],back[2],outer[2],outer[3]],vertices:[B[3],B[2],O[2],O[3]]},
@@ -156,12 +167,19 @@ function rebuild() {
   while(room.children.length) {
     const m=room.children[0];room.remove(m);m.geometry.dispose();m.material.dispose();
   }
+  if(!current.spatial){
+    derived=null;
+    const geometry=new THREE.PlaneGeometry(current.width/current.height,1);
+    const material=new THREE.MeshBasicMaterial({map:currentTexture,side:THREE.DoubleSide});
+    const mesh=new THREE.Mesh(geometry,material);mesh.name='sign';room.add(mesh);
+    resize();drawDebug();dirty=true;return;
+  }
   derived=deriveRoom(currentConfig,current.width/current.height);
   const skyColors=sampleSky(currentTexture);
   const {width:pw,height:ph}=current;
   for(const [name,region] of Object.entries(derived.regions)) {
     const vertices=region.vertices.map(v=>v.clone());
-    const farSky=name==='sky' && currentConfig.sky.mode==='far-plane';
+    const farSky=false; // The immersive room keeps the sky on its actual ceiling.
     let sourceRegion=region.source;
     if(farSky) {
       const far=derived.backDistance+derived.depth*4;
@@ -213,8 +231,8 @@ addEventListener('resize',resize);
 
 async function selectPhoto(photo) {
   if(current?.id===photo.id)return;
-  const request=++generation;
-  current=photo;currentConfig=structuredClone(configMap.get(photo.id));
+  const request=++generation;loadingPhoto=true;
+  current=photo;currentConfig=photo.spatial?structuredClone(configMap.get(photo.id)):null;entrance=0;
   $('#photo-year').textContent=`${photo.year}s`;
   $('#photo-description').textContent=photo.description;
   if(activeButton)activeButton.removeAttribute('aria-current');
@@ -226,9 +244,9 @@ async function selectPhoto(photo) {
     texture.colorSpace=THREE.SRGBColorSpace;
     texture.anisotropy=renderer?Math.min(8,renderer.capabilities.getMaxAnisotropy()):1;
     currentTexture?.dispose();currentTexture=texture;
-    if(renderer){fallback.hidden=true;canvas.hidden=false;rebuild();}
+    if(renderer){fallback.hidden=!debug;canvas.hidden=debug;if(debug){fallback.src=photo.src;fallback.alt=photo.description;}rebuild();}
     else{fallback.src=photo.src;fallback.alt=photo.description;fallback.hidden=false;}
-    document.documentElement.dataset.ready='true';
+    loadingPhoto=false;document.documentElement.dataset.ready='true';
     refreshDebugPanel();
   } catch(error) {
     if(request!==generation)return;
@@ -241,7 +259,7 @@ function updateTimeline(year) {
   for(const el of $('#eras').children) {
     const yes=Number(el.dataset.year)===year;el.classList.toggle('active',yes);if(yes)active=el;
   }
-  if(active)$('#eras').style.transform=`translateY(${-active.offsetTop}px)`;
+  // The timeline stays physically stationary; only its active item changes.
 }
 
 for(const era of archive.eras) {
@@ -249,14 +267,13 @@ for(const era of archive.eras) {
   const label=document.createElement('h2');label.className='era-label';label.textContent=`${era.year}s`;section.append(label);
   for(const photo of archive.photos.filter(p=>p.era===era.year)) {
     const button=document.createElement('button');button.className='photo-button';button.type='button';button.dataset.id=photo.id;
-    button.setAttribute('aria-label',`${photo.year}s · ${photo.description} · 확대`);
+    button.setAttribute('aria-label',`${photo.year}s · ${photo.description} · 선택`);
     const img=document.createElement('img');img.src=photo.src;img.alt=photo.description;
     img.width=photo.width;img.height=photo.height;img.loading='lazy';img.decoding='async';
     // A single uniform scale per thumbnail; portrait and landscape ratios stay original.
     const scale=Math.min(1,180/Math.max(photo.width,photo.height));
     img.style.width=`${photo.width*scale}px`;
-    button.append(img);button.addEventListener('click',()=>openPhoto(photo));
-    button.addEventListener('focus',()=>{if(photo.spatial)selectPhoto(photo);});
+    button.append(img);button.addEventListener('click',()=>navigateTo(photoIndex.get(photo.id)));
     buttons.set(photo.id,button);section.append(button);
   }
   $('#archive').append(section);
@@ -266,20 +283,40 @@ for(const era of archive.eras) {
   item.append(heading,policy);$('#eras').append(item);
 }
 
-let anchors=[];
-function measureAnchors(){anchors=spatial.map(photo=>({photo,y:buttons.get(photo.id).getBoundingClientRect().top+scrollY}));onScroll();}
-function onScroll() {
-  if(!anchors.length || $('#enlarged').open)return;
-  const target=scrollY+innerHeight*.42;
-  let i=0;
-  while(i<anchors.length-1 && (anchors[i].y+anchors[i+1].y)/2<target)i++;
-  const a=anchors[i],prev=anchors[Math.max(0,i-1)],next=anchors[Math.min(i+1,anchors.length-1)];
-  const start=i===0?0:(prev.y+a.y)/2,end=i===anchors.length-1?a.y+innerHeight:(a.y+next.y)/2;
-  frameProgress=clamp((target-start)/Math.max(1,end-start),0,1);
-  selectPhoto(a.photo);dirty=true;
+// Fixed, independently scrollable archive. Stage gestures never scroll it.
+function navigateTo(index, immediate=false) {
+  targetTravel=clamp(index,0,archive.photos.length-1);
+  if(immediate||reduced){travel=targetTravel;travelVelocity=0;}
+  selectPhoto(archive.photos[Math.round(targetTravel)]);
+  dirty=true;
 }
-addEventListener('scroll',onScroll,{passive:true});
-new ResizeObserver(measureAnchors).observe($('#archive'));
+function onScroll(){dirty=true;}
+function pushTravel(delta) {
+  targetTravel=clamp(targetTravel+delta,0,archive.photos.length-1);
+  clearTimeout(settleTimer);
+  settleTimer=setTimeout(()=>{targetTravel=Math.round(targetTravel);dirty=true;},180);
+  dirty=true;
+}
+$('#stage').addEventListener('wheel',e=>{
+  if(debug||dialog.open)return;
+  e.preventDefault();
+  const unit=e.deltaMode===1?16:e.deltaMode===2?innerHeight:1;
+  pushTravel(clamp(e.deltaY*unit,-240,240)*.0045);
+},{passive:false});
+$('#timeline').addEventListener('wheel',e=>{e.preventDefault();pushTravel(clamp(e.deltaY,-240,240)*.0045);},{passive:false});
+let touchY;
+$('#stage').addEventListener('touchstart',e=>{touchY=e.touches[0].clientY;},{passive:true});
+$('#stage').addEventListener('touchmove',e=>{if(debug||touchY==null||dialog.open)return;e.preventDefault();const y=e.touches[0].clientY;pushTravel((touchY-y)*.009);touchY=y;},{passive:false});
+$('#stage').addEventListener('touchend',()=>{touchY=null;targetTravel=Math.round(targetTravel);});
+$('#stage').addEventListener('pointermove',e=>{const r=$('#stage').getBoundingClientRect();pointerX=clamp((e.clientX-r.left)/r.width*2-1,-1,1);pointerY=clamp((e.clientY-r.top)/r.height*2-1,-1,1);dirty=true;});
+$('#stage').addEventListener('pointerleave',()=>{pointerX=pointerY=0;dirty=true;});
+addEventListener('keydown',e=>{
+  if(dialog.open||debug||e.target.closest('select, input, textarea'))return;
+  if(['ArrowDown','PageDown','ArrowRight','ArrowUp','PageUp','ArrowLeft','Home','End'].includes(e.key)){
+    e.preventDefault();const backwards=['ArrowUp','PageUp','ArrowLeft'].includes(e.key);
+    navigateTo(e.key==='Home'?0:e.key==='End'?archive.photos.length-1:Math.round(targetTravel)+(backwards?-1:1));
+  }
+});
 
 // Enlarged original photo, including the complete left-hand archive behind it.
 // Wheel/pinch zooms and pointer drag pans; only the return button is visible.
@@ -301,32 +338,54 @@ frame.addEventListener('click',e=>{if(!debug&&current)openPhoto(current);});
 frame.tabIndex=0;frame.setAttribute('role','button');frame.setAttribute('aria-label','공간 사진 확대');
 frame.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();if(current)openPhoto(current);}});
 
-function render() {
+function render(time=0) {
   if(disposed)return;
   requestAnimationFrame(render);
-  if(!dirty || !renderer || !derived || !currentConfig)return;
+  const dt=Math.min((time-lastFrame)/1000||1/60,.035);lastFrame=time;
+  const displacement=targetTravel-travel;
+  travelVelocity+=(displacement*110-travelVelocity*20)*dt;
+  travel+=travelVelocity*dt;
+  if(Math.abs(displacement)<.0001&&Math.abs(travelVelocity)<.001){travel=targetTravel;travelVelocity=0;}
+  const index=clamp(Math.round(travel),0,archive.photos.length-1);
+  if(Math.abs(targetTravel-travel)<.6 && current?.id!==archive.photos[index].id)selectPhoto(archive.photos[index]);
+  const damping=1-Math.exp(-dt*6);
+  entrance+=(1-entrance)*(reduced?1:damping);
+  lookX+=(pointerX-lookX)*damping;lookY+=(pointerY-lookY)*damping;
+  if(!renderer || !currentTexture || !current || loadingPhoto)return;
+  if(!dirty && Math.abs(displacement)<.0001 && entrance>.9999 && Math.abs(pointerX-lookX)+Math.abs(pointerY-lookY)<.0001)return;
   dirty=false;
-  const vp=currentConfig.vanishingPoint;
-  const phase=reduced||debug?0:(frameProgress-.5)*2;
-  const yaw=clamp(phase*THREE.MathUtils.degToRad(16),-Math.PI/9,Math.PI/9);
-  const pitch=clamp(phase*THREE.MathUtils.degToRad(6),-Math.PI/18,Math.PI/18);
-  // The capture position is the origin, at the open front of the room.
-  // Translate only a small fraction of the capture-to-front distance.
-  camera.position.set(Math.sin(yaw)*derived.f*.045,Math.sin(pitch)*derived.f*.035,0);
-  camera.rotation.set(pitch*.22,yaw*.22,0,'YXZ');
-  camera.updateProjectionMatrix();
-  camera.projectionMatrix.elements[8]=1-2*vp.x;
-  camera.projectionMatrix.elements[9]=2*vp.y-1;
-  camera.projectionMatrixInverse.copy(camera.projectionMatrix).invert();
-  for(const mesh of room.children)mesh.material.uniforms.darkening.value=Math.abs(phase)*.045;
+  camera.aspect=current.width/current.height;
+  let yaw=0,pitch=0;
+  if(current.spatial&&derived&&currentConfig){
+    frameProgress=1-Math.min(1,Math.abs(travel-Math.round(travel))*2);
+    const dive=debug?0:entrance;
+    yaw=debug||reduced?0:clamp(lookX*THREE.MathUtils.degToRad(15)+travelVelocity*.008,-Math.PI/9,Math.PI/9);
+    pitch=debug||reduced?0:clamp(lookY*THREE.MathUtils.degToRad(8),-Math.PI/18,Math.PI/18);
+    camera.fov=debug?50:90;
+    // Enter through the open front and stop inside the cube, facing the VP wall.
+    // Five surfaces acquire independent parallax, without orbiting an outer box.
+    const inside=derived.f+derived.side*(.12+.08*frameProgress);
+    camera.position.set(derived.cx*dive+lookX*derived.side*.035*dive,
+      derived.cy*dive-lookY*derived.side*.025*dive,-inside*dive);
+    camera.rotation.set(-pitch,-yaw,0,'YXZ');
+    camera.near=derived.side*.005;camera.far=derived.f+derived.side*12;
+    camera.updateProjectionMatrix();
+    if(debug){camera.projectionMatrix.elements[8]=1-2*currentConfig.vanishingPoint.x;camera.projectionMatrix.elements[9]=2*currentConfig.vanishingPoint.y-1;}
+    camera.projectionMatrixInverse.copy(camera.projectionMatrix).invert();
+    for(const mesh of room.children)mesh.material.uniforms.darkening.value=0;
+  }else{
+    camera.fov=50;camera.position.set(0,0,1/(2*Math.tan(THREE.MathUtils.degToRad(25))));
+    camera.rotation.set(0,0,0);camera.near=.01;camera.far=100;camera.updateProjectionMatrix();
+  }
   renderer.render(scene,camera);
-  window.__signArchive={id:current.id,faces:room.children.map(m=>m.name),depth:derived.depth,
+  window.__signArchive={id:current.id,faces:room.children.map(m=>m.name),depth:derived?.depth??0,
+    cubeSide:derived?.side??0,cameraZ:camera.position.z,entrance,travel,targetTravel,
     yawDegrees:THREE.MathUtils.radToDeg(yaw),pitchDegrees:THREE.MathUtils.radToDeg(pitch),
     textureCount:renderer.info.memory.textures,spatialCount:spatial.length};
 }
 
 function drawDebug() {
-  const svg=$('#debug-overlay');svg.toggleAttribute('hidden',!debug);if(!debug||!derived)return;
+  const svg=$('#debug-overlay');svg.toggleAttribute('hidden',!debug||!derived);if(!debug||!derived)return;
   svg.replaceChildren();
   for(const region of Object.values(derived.regions)) {
     const p=document.createElementNS('http://www.w3.org/2000/svg','polygon');
@@ -350,7 +409,7 @@ $('#debug-overlay').addEventListener('pointermove',e=>{
 });
 $('#debug-overlay').addEventListener('pointerup',()=>debugHandle=null);
 $('#debug-overlay').addEventListener('pointercancel',()=>debugHandle=null);
-function refreshDebugPanel(){if(!debug||!currentConfig)return;$('#debug-json').textContent=JSON.stringify(currentConfig,null,2);$('#sky-mode').value=currentConfig.sky.mode;}
+function refreshDebugPanel(){if(!debug)return;$('#debug-panel').hidden=!currentConfig;if(!currentConfig)return;$('#debug-json').textContent=JSON.stringify(currentConfig,null,2);$('#sky-mode').value=currentConfig.sky.mode;}
 if(debug) {
   const panel=document.createElement('div');panel.id='debug-panel';
   panel.innerHTML='<label>하늘 <select id="sky-mode"><option>photo</option><option>gradient</option><option>far-plane</option></select></label> <button id="export-config">JSON 저장</button><pre id="debug-json"></pre>';
@@ -358,8 +417,8 @@ if(debug) {
   $('#sky-mode').addEventListener('change',e=>{currentConfig.sky.mode=e.target.value;configMap.set(current.id,structuredClone(currentConfig));rebuild();refreshDebugPanel();});
   $('#export-config').addEventListener('click',()=>{const url=URL.createObjectURL(new Blob([JSON.stringify([...configMap.values()],null,2)],{type:'application/json'}));const link=document.createElement('a');link.href=url;link.download='projections.json';link.click();setTimeout(()=>URL.revokeObjectURL(url),1000);});
 }
-// Do not silently apply a guessed reconstruction to sign-only photographs.
-if(spatial.length)await selectPhoto(spatial[0]);
+// Both spatial photographs and standalone signs participate in navigation.
+if(archive.photos.length)await selectPhoto(archive.photos[0]);
 await Promise.all([...$('#archive').querySelectorAll('img')].filter(i=>i.loading!=='lazy').map(i=>i.decode().catch(()=>{})));
-measureAnchors();render();
+render();
 addEventListener('pagehide',()=>{disposed=true;currentTexture?.dispose();renderer?.dispose();},{once:true});
